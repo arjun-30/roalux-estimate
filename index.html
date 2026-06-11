@@ -1,0 +1,3252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roalux Estimator</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy: #0F1B2D;
+      --slate: #1E3A5F;
+      --slate-light: #2A4F7A;
+      --amber: #F59E0B;
+      --amber-dim: #D97706;
+      --sky: #38BDF8;
+      --bg: #EEF3F8;
+      --card: #FFFFFF;
+      --text: #0F1B2D;
+      --text-muted: #5A7A99;
+      --border: #D1DDE8;
+      --green: #10B981;
+      --red: #EF4444;
+      --purple: #8B5CF6;
+      --sidebar-w: 228px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 22px 18px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .logo-mark {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--amber);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      margin-top: 2px;
+    }
+
+    .nav-group {
+      padding: 10px 0 4px;
+    }
+
+    .nav-group-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.22);
+      padding: 6px 18px 2px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 18px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-item.active {
+      color: #fff;
+      background: rgba(245, 158, 11, 0.13);
+      border-left-color: var(--amber);
+    }
+
+    .nav-icon {
+      font-size: 15px;
+      width: 19px;
+      text-align: center;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--amber);
+      color: var(--navy);
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 1px 6px;
+      border-radius: 3px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .nav-badge.blue {
+      background: #3B82F6;
+      color: #fff;
+    }
+
+    .nav-badge.green {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .sidebar-footer-text {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.2);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .topbar-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .topbar-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', monospace;
+      margin-top: 1px;
+    }
+
+    .topbar-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--amber);
+      color: var(--navy);
+    }
+
+    .btn-primary:hover {
+      background: var(--amber-dim);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .btn-sm {
+      padding: 5px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    .btn-danger {
+      background: #FEE2E2;
+      color: var(--red);
+      border: 1px solid #FECACA;
+    }
+
+    .btn-danger:hover {
+      background: #FECACA;
+    }
+
+    .btn-success {
+      background: #D1FAE5;
+      color: #065F46;
+      border: 1px solid #A7F3D0;
+    }
+
+    .btn-success:hover {
+      background: #A7F3D0;
+    }
+
+    .btn-purple {
+      background: #EDE9FE;
+      color: #5B21B6;
+      border: 1px solid #DDD6FE;
+    }
+
+    .btn-purple:hover {
+      background: #DDD6FE;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .view {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      top: -10px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      opacity: 0.07;
+    }
+
+    .stat-card.s-blue::after {
+      background: #3B82F6;
+    }
+
+    .stat-card.s-amber::after {
+      background: var(--amber);
+    }
+
+    .stat-card.s-purple::after {
+      background: var(--purple);
+    }
+
+    .stat-card.s-green::after {
+      background: var(--green);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.3px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 4px;
+      line-height: 1;
+    }
+
+    .stat-card.s-blue .stat-value {
+      color: #1D4ED8;
+    }
+
+    .stat-card.s-amber .stat-value {
+      color: var(--amber-dim);
+    }
+
+    .stat-card.s-purple .stat-value {
+      color: var(--purple);
+    }
+
+    .stat-card.s-green .stat-value {
+      color: var(--green);
+    }
+
+    .stat-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── SEARCH / TOOLBAR ── */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-ico {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .search-input:focus {
+      border-color: var(--amber);
+    }
+
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 14px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    /* ── CARDS GRID ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .cards-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    /* ── RM CARD ── */
+    .rm-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 16px 14px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow .15s, border-color .15s, transform .1s;
+    }
+
+    .rm-card:hover {
+      box-shadow: 0 4px 18px rgba(15, 27, 45, 0.1);
+      border-color: #AABFD4;
+      transform: translateY(-1px);
+    }
+
+    .rm-card-accent {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 10px 0 0 10px;
+      background: var(--sky);
+    }
+
+    .rm-code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--sky);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .rm-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 3px;
+    }
+
+    .rm-inci {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    .rm-meta {
+      display: flex;
+      gap: 7px;
+      margin-top: 9px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .rm-usage {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .supplier-chips {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .s-chip {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'IBM Plex Mono', monospace;
+      flex-shrink: 0;
+      cursor: default;
+      position: relative;
+    }
+
+    .s-chip:hover .s-chip-tip {
+      display: block;
+    }
+
+    .s-chip-tip {
+      display: none;
+      position: absolute;
+      bottom: 130%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: #fff;
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* ── PRODUCT CARD ── */
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow .15s, border-color .15s, transform .1s;
+    }
+
+    .product-card:hover {
+      box-shadow: 0 4px 18px rgba(15, 27, 45, 0.1);
+      border-color: #AABFD4;
+      transform: translateY(-1px);
+    }
+
+    .prod-accent {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 10px 0 0 10px;
+    }
+
+    .product-card.s-development .prod-accent {
+      background: #94A3B8;
+    }
+
+    .product-card.s-trial .prod-accent {
+      background: var(--purple);
+    }
+
+    .product-card.s-finalized .prod-accent {
+      background: var(--green);
+    }
+
+    .prod-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .prod-code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .prod-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 3px;
+    }
+
+    .prod-cat {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .prod-stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .ps-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ps-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .ps-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .ps-div {
+      width: 1px;
+      background: var(--border);
+      align-self: stretch;
+      margin: 1px 0;
+    }
+
+    .prod-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    /* ── TAGS / PILLS ── */
+    .tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      white-space: nowrap;
+    }
+
+    .tag-sky {
+      background: #E0F7FF;
+      color: #0369A1;
+    }
+
+    .tag-blue {
+      background: #EFF8FF;
+      color: #1E4A8A;
+    }
+
+    .tag-green {
+      background: #ECFDF5;
+      color: #065F46;
+    }
+
+    .tag-amber {
+      background: #FFFBEB;
+      color: #92400E;
+    }
+
+    .tag-red {
+      background: #FEF2F2;
+      color: #991B1B;
+    }
+
+    .tag-purple {
+      background: #F5F3FF;
+      color: #4C1D95;
+    }
+
+    .tag-gray {
+      background: #F1F5F9;
+      color: #475569;
+    }
+
+    .tag-navy {
+      background: #EEF3F8;
+      color: var(--navy);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .status-pill::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .pill-draft {
+      background: #F1F5F9;
+      color: #475569;
+    }
+
+    .pill-draft::before {
+      background: #94A3B8;
+    }
+
+    .pill-testing {
+      background: #EFF6FF;
+      color: #1D4ED8;
+    }
+
+    .pill-testing::before {
+      background: #3B82F6;
+    }
+
+    .pill-passed {
+      background: #ECFDF5;
+      color: #065F46;
+    }
+
+    .pill-passed::before {
+      background: var(--green);
+    }
+
+    .pill-failed {
+      background: #FEF2F2;
+      color: #991B1B;
+    }
+
+    .pill-failed::before {
+      background: var(--red);
+    }
+
+    .pill-finalized {
+      background: #FFFBEB;
+      color: #92400E;
+    }
+
+    .pill-finalized::before {
+      background: var(--amber);
+    }
+
+    .pill-development {
+      background: #F8FAFC;
+      color: #64748B;
+    }
+
+    .pill-development::before {
+      background: #94A3B8;
+    }
+
+    .pill-trial {
+      background: #F5F3FF;
+      color: #5B21B6;
+    }
+
+    .pill-trial::before {
+      background: var(--purple);
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #FAFCFF;
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.1px;
+      color: var(--text-muted);
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    /* ── TABLES ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+      padding: 9px 13px;
+      background: #FAFCFF;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 11px 13px;
+      font-size: 13px;
+      border-bottom: 1px solid #EEF3F8;
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: #FAFCFF;
+    }
+
+    .data-table td.mono {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+    }
+
+    .data-table td.fw {
+      font-weight: 600;
+    }
+
+    .formula-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .formula-table th {
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #FAFCFF;
+    }
+
+    .formula-table td {
+      padding: 9px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #EEF3F8;
+      vertical-align: middle;
+    }
+
+    .formula-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .formula-table tr:hover td {
+      background: #FAFCFF;
+    }
+
+    .formula-table td.mono {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .formula-total-row td {
+      background: #FFFBEB;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      border-top: 2px solid var(--amber);
+      font-size: 12px;
+    }
+
+    /* ── DETAIL LAYOUT ── */
+    .detail-layout {
+      display: flex;
+      gap: 18px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .detail-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+      overflow-y: auto;
+    }
+
+    .detail-side {
+      width: 276px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    /* ── SUPPLIER COMPARISON ── */
+    .sup-compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .sup-compare-card {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 14px;
+      position: relative;
+      transition: border-color .2s;
+    }
+
+    .sup-compare-card.winner {
+      border-color: var(--green);
+      background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+    }
+
+    .win-badge {
+      position: absolute;
+      top: -9px;
+      right: 12px;
+      background: var(--green);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 10px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .sc-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sc-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .sc-avg {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 8px;
+    }
+
+    .sc-avg-label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-rows {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      width: 72px;
+      flex-shrink: 0;
+    }
+
+    .score-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: #E5EFF7;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .score-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .7s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .score-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      width: 30px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .score-input {
+      width: 50px;
+      padding: 3px 5px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      text-align: center;
+      outline: none;
+    }
+
+    .score-input:focus {
+      border-color: var(--amber);
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 27, 45, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 14px;
+      width: 580px;
+      max-width: 95vw;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(15, 27, 45, 0.28);
+    }
+
+    .modal.wide {
+      width: 700px;
+    }
+
+    .modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      z-index: 1;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 20px;
+      line-height: 1;
+      border: none;
+      background: transparent;
+      transition: background .15s;
+    }
+
+    .modal-close:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .modal-body {
+      padding: 22px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 4px;
+    }
+
+    /* ── FORMS ── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .9px;
+      color: var(--text-muted);
+    }
+
+    .form-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--card);
+      outline: none;
+      transition: border-color .15s;
+      width: 100%;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+
+    .form-input.readonly {
+      background: #F8FAFC;
+      color: var(--text-muted);
+      cursor: default;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 70px;
+      line-height: 1.5;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ── RM PICKER ── */
+    .rm-picker {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .rm-picker-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 13px;
+      cursor: pointer;
+      border-bottom: 1px solid #EEF3F8;
+      transition: background .1s;
+    }
+
+    .rm-picker-item:last-child {
+      border-bottom: none;
+    }
+
+    .rm-picker-item:hover {
+      background: var(--bg);
+    }
+
+    .rm-check {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      flex-shrink: 0;
+      transition: all .1s;
+    }
+
+    .rm-picker-item.selected .rm-check {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #fff;
+    }
+
+    /* ── FORMULA EDITOR ── */
+    .formula-editor {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .formula-editor-head {
+      display: grid;
+      grid-template-columns: 1fr 110px 80px 32px;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #F8FAFC;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .formula-editor-head span {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--text-muted);
+    }
+
+    .formula-rows {
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 40px;
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: 1fr 110px 80px 32px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .formula-editor-foot {
+      padding: 8px 10px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .total-bar-wrap {
+      margin-top: 8px;
+      background: #EEF3F8;
+      border-radius: 4px;
+      height: 7px;
+      overflow: hidden;
+    }
+
+    .total-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .4s, background .3s;
+    }
+
+    .total-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── BACK / BREADCRUMB ── */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 0;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      border: none;
+      background: none;
+      transition: color .15s;
+    }
+
+    .back-btn:hover {
+      color: var(--text);
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .bc-sep {
+      color: #C8D8E8;
+    }
+
+    .bc-active {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+      gap: 8px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 32px;
+      opacity: .35;
+    }
+
+    .empty-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .empty-hint {
+      font-size: 12px;
+      max-width: 220px;
+      line-height: 1.5;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--navy);
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 28px rgba(15, 27, 45, 0.28);
+      z-index: 300;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .28s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 340px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.error {
+      background: var(--red);
+    }
+
+    .toast.success {
+      background: var(--green);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── INFO ROWS ── */
+    .info-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .info-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .info-value.mono {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* ── SCORE EDIT TOGGLE ── */
+    .edit-scores-wrap {
+      display: none;
+    }
+
+    .edit-scores-wrap.open {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .score-edit-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-edit-label {
+      font-size: 12px;
+      color: var(--text);
+      width: 90px;
+      flex-shrink: 0;
+    }
+
+    /* ── ACTIVITY FEED ── */
+    .activity-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #EEF3F8;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .activity-text {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .activity-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', monospace;
+      margin-top: 2px;
+    }
+
+    /* ── PROGRESS RING ── */
+    .progress-ring-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #C8D8E4;
+      border-radius: 3px;
+    }
+
+    /* ── RM DETAIL ── */
+    .rm-detail-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .rm-detail-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #E0F7FF, #C7EFFE);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    /* ── BATCH TYPE BANNER ── */
+    .batch-type-banner {
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .banner-supplier {
+      background: #F5F3FF;
+      border: 1px solid #DDD6FE;
+      color: #4C1D95;
+    }
+
+    .banner-formula {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      color: #1E40AF;
+    }
+
+    .banner-stability {
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      color: #065F46;
+    }
+
+    .banner-icon {
+      font-size: 20px;
+    }
+
+    /* Responsive note */
+    @media(max-width:900px) {
+      .cards-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    /* ── FLOATING ACTION BUTTON ── */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 200;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: var(--amber);
+      color: var(--navy);
+      border: none;
+      border-radius: 50px;
+      padding: 14px 22px 14px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 6px 28px rgba(245, 158, 11, 0.45);
+      transition: transform .18s, box-shadow .18s, background .15s;
+      white-space: nowrap;
+    }
+
+    .fab:hover {
+      background: var(--amber-dim);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 10px 36px rgba(245, 158, 11, 0.55);
+    }
+
+    .fab:active {
+      transform: scale(0.97);
+    }
+
+    .fab.visible {
+      display: inline-flex;
+    }
+
+    .fab-icon {
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 400;
+    }
+
+    /* ── PROFORMA INVOICE ── */
+    .inv-doc {
+      padding: 48px 52px;
+      font-family: 'Inter', sans-serif;
+      color: #1A1A1A;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .inv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 36px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #1A1A1A;
+    }
+
+    .inv-brand {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .inv-brand-sub {
+      font-size: 11px;
+      color: #737373;
+      margin-top: 2px;
+      letter-spacing: 1px;
+    }
+
+    .inv-meta-block {
+      text-align: right;
+    }
+
+    .inv-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #737373;
+    }
+
+    .inv-number {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .inv-date {
+      font-size: 12px;
+      color: #737373;
+      margin-top: 4px;
+    }
+
+    .inv-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .inv-detail-block dt {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #737373;
+      margin-bottom: 4px;
+    }
+
+    .inv-detail-block dd {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .inv-detail-block dd.sub {
+      font-weight: 400;
+      color: #555;
+      font-size: 12px;
+    }
+
+    .inv-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0;
+    }
+
+    .inv-table th {
+      background: #F5F5F3;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #737373;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid #E4E4E0;
+    }
+
+    .inv-table th:last-child,
+    .inv-table td:last-child {
+      text-align: right;
+    }
+
+    .inv-table td {
+      padding: 11px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid #F0F0EE;
+      vertical-align: middle;
+    }
+
+    .inv-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .inv-table tr:hover td {
+      background: #FAFAF8;
+    }
+
+    .inv-totals {
+      margin-top: 0;
+      border-top: 2px solid #1A1A1A;
+    }
+
+    .inv-totals table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .inv-totals td {
+      padding: 9px 14px;
+      font-size: 13px;
+    }
+
+    .inv-totals td:last-child {
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .inv-grand td {
+      font-size: 15px;
+      font-weight: 800;
+      padding: 12px 14px;
+      border-top: 1px solid #E4E4E0;
+      background: #F5F5F3;
+    }
+
+    .inv-footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid #E4E4E0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .inv-note {
+      font-size: 11px;
+      color: #999;
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    .inv-sign {
+      text-align: center;
+    }
+
+    .inv-sign-line {
+      width: 160px;
+      border-top: 1px solid #1A1A1A;
+      margin: 0 auto 6px;
+    }
+
+    .inv-sign-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #737373;
+      font-weight: 600;
+    }
+
+    @media print {
+      body > *:not(.main) { display: none !important; }
+      .main > .topbar { display: none !important; }
+      .content > .view:not(#view-proforma) { display: none !important; }
+      #view-proforma .toolbar { display: none !important; }
+      .fab { display: none !important; }
+      #proforma-output {
+        border: none !important;
+        border-radius: 0 !important;
+      }
+    }
+
+    /* ════ MIXLAB INVOICE DESIGN ════ */
+    .mixlab-container {
+      background: white;
+      padding: 40px;
+      font-family: 'Inter', sans-serif;
+      color: #1A1A1A;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+      max-width: 1100px;
+      margin: 0 auto;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+    }
+    .mixlab-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 140px;
+      font-weight: 800;
+      color: rgba(0,0,0,0.02);
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 1;
+    }
+    .mixlab-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid #1A1A1A;
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .mixlab-logo {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mixlab-logo span {
+      background: linear-gradient(135deg, #EC4899, #F59E0B, #10B981, #3B82F6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+    }
+    .mixlab-subtitle {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #666;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .mixlab-title-block {
+      text-align: right;
+    }
+    .mixlab-title {
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .mixlab-date {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .mixlab-meta-grid {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 2;
+    }
+    .mixlab-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mixlab-meta-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .mixlab-input {
+      border: 1px solid transparent;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 4px 8px;
+      margin: -4px -8px;
+      border-radius: 4px;
+      background: transparent;
+      color: #1A1A1A;
+      transition: all 0.2s;
+    }
+    .mixlab-input:hover, .mixlab-input:focus {
+      border-color: #E2E8F0;
+      background: #F8FAFC;
+      outline: none;
+    }
+    .mixlab-cards {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 2;
+    }
+    .mixlab-card {
+      flex: 1;
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .mixlab-card-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1A1A1A;
+      margin-bottom: 8px;
+    }
+    .mixlab-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .mixlab-table {
+      width: 100%;
+      border-collapse: collapse;
+      position: relative;
+      z-index: 2;
+    }
+    .mixlab-table th {
+      text-align: left;
+      font-size: 10px;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #E2E8F0;
+      background: #F8FAFC;
+    }
+    .mixlab-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #F1F5F9;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+    .mixlab-table tr:hover td {
+      background: #F8FAFC;
+    }
+    .mixlab-rm-select {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 4px;
+      margin: -4px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1A1A1A;
+    }
+    .mixlab-rm-select:hover, .mixlab-rm-select:focus {
+      border-color: #E2E8F0;
+      background: white;
+    }
+    .mixlab-num-input {
+      width: 80px;
+      text-align: right;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .mixlab-add-row {
+      margin-top: 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">ROALUX<span class="logo-dot"></span></div>
+      <div class="logo-sub">Estimator</div>
+    </div>
+
+    <div class="nav-group">
+      
+      <div class="nav-item active" data-view="dashboard" onclick="navTo('dashboard',this)">
+        <span class="nav-icon">&#9632;</span> Dashboard
+      </div>
+    </div>
+
+    <div class="nav-group">
+      
+      <div class="nav-item" data-view="rawmaterials" onclick="navTo('rawmaterials',this)">
+        <span class="nav-icon">&#9679;</span> Raw Materials
+        <span class="nav-badge blue" id="nb-rm">0</span>
+      </div>
+
+      <div class="nav-item" data-view="products" onclick="navTo('products',this)">
+        <span class="nav-icon">&#9679;</span> Proforma Invoice
+        <span class="nav-badge" id="nb-prod">0</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text">Roalux Estimator v2</div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="tb-title">Dashboard</div>
+        <div class="topbar-sub" id="tb-sub">Overview &amp; Activity</div>
+      </div>
+      <div class="topbar-actions" id="tb-actions"></div>
+    </div>
+
+    <div class="content" id="main-content">
+
+      <!-- ════ DASHBOARD ════ -->
+      <div class="view active" id="view-dashboard">
+        <div class="stats-row">
+          <div class="stat-card s-blue">
+            <div class="stat-label">Raw Materials</div>
+            <div class="stat-value" id="ds-rm">0</div>
+            <div class="stat-hint">in ingredient library</div>
+          </div>
+          <div class="stat-card s-amber">
+            <div class="stat-label">Products</div>
+            <div class="stat-value" id="ds-prod">0</div>
+            <div class="stat-hint">formulations tracked</div>
+          </div>
+          <div class="stat-card s-purple">
+            <div class="stat-label">Trial Batches</div>
+            <div class="stat-value" id="ds-batches">0</div>
+            <div class="stat-hint">across all products</div>
+          </div>
+          <div class="stat-card s-green">
+            <div class="stat-label">Finalized</div>
+            <div class="stat-value" id="ds-final">0</div>
+            <div class="stat-hint">formulas approved</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:18px">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Products Overview</span>
+              <button class="btn btn-ghost btn-sm"
+                onclick="navTo('products', document.querySelector('[data-view=products]'))">View All →</button>
+            </div>
+            <div id="dash-products-table">
+              <div class="empty-state">
+                <div class="empty-icon">◈</div>
+                <div class="empty-title">No products yet</div>
+                <div class="empty-hint">Create your first formulation to get started</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">Activity Feed</span></div>
+            <div style="padding:4px 16px 16px" id="dash-activity">
+              <div class="empty-state" style="padding:32px 12px">
+                <div class="empty-icon">📋</div>
+                <div class="empty-title">No activity yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ RAW MATERIALS ════ -->
+      <div class="view" id="view-rawmaterials">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <span class="search-ico">🔍</span>
+            <input class="search-input" id="rm-search" placeholder="Search by name, code, category, INCI…"
+              oninput="renderRMs()">
+          </div>
+          <div class="filter-btn" id="rmf-all" onclick="setRMFilter('all',this)">All</div>
+          <div class="filter-btn" id="rmf-Solvent" onclick="setRMFilter('Solvent',this)">Solvents</div>
+          <div class="filter-btn" id="rmf-Active" onclick="setRMFilter('Active',this)">Actives</div>
+          <div class="filter-btn" id="rmf-Preservative" onclick="setRMFilter('Preservative',this)">Preservatives</div>
+          
+        </div>
+        <div id="rm-grid" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <!-- ════ RM DETAIL ════ -->
+      <div class="view" id="view-rm-detail">
+        <div><button class="back-btn" id="rm-detail-back">← Back to Raw Materials</button></div>
+        <div id="rm-detail-content"></div>
+      </div>
+
+      <!-- ════ PRODUCTS ════ -->
+      <div class="view" id="view-products">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <span class="search-ico">🔍</span>
+            <input class="search-input" id="prod-search" placeholder="Search products…" oninput="renderProducts()">
+          </div>
+          <div class="filter-btn" id="pf-all" onclick="setProdFilter('all',this)">All</div>
+          <div class="filter-btn" id="pf-development" onclick="setProdFilter('development',this)">Development</div>
+          <div class="filter-btn" id="pf-trial" onclick="setProdFilter('trial',this)">In Trial</div>
+          <div class="filter-btn" id="pf-finalized" onclick="setProdFilter('finalized',this)">Finalized</div>
+          
+        </div>
+        <div class="cards-grid" id="product-grid"></div>
+    </div>
+
+      <!-- ════ PRODUCT DETAIL ════ -->
+      <div class="view" id="view-product-detail">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="back-btn" onclick="navTo('products', document.querySelector('[data-view=products]'))">←
+            Products</button>
+          <span class="bc-sep">/</span>
+          <span class="bc-active" id="pd-breadcrumb">Product</span>
+        </div>
+        <div class="detail-layout" id="pd-layout"></div>
+      </div>
+
+      <!-- ════ BATCH DETAIL ════ -->
+      <div class="view" id="view-batch-detail" style="padding: 24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1100px;margin:0 auto 16px;">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="back-btn" id="bd-back">← Product</button>
+            <span class="bc-sep">/</span>
+            <span class="bc-active" id="bd-breadcrumb">Trial Batch Estimate</span>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="saveMixlabBatch()">💾 Save Changes</button>
+            <button class="btn btn-ghost" onclick="printProformaFromBatch()">🖨️ Print</button>
+          </div>
+        </div>
+        
+        <div class="mixlab-container">
+          <div class="mixlab-watermark">CONFIDENTIAL</div>
+          
+          <div class="mixlab-header">
+            <div>
+              <div class="mixlab-logo">ROALUX <span>MIXLAB</span></div>
+              <div class="mixlab-subtitle">Paint Recipe System</div>
+            </div>
+            <div class="mixlab-title-block">
+              <div class="mixlab-title">Price Estimate</div>
+              <div class="mixlab-date" id="ml-date">Modified: 22/05/26</div>
+            </div>
+          </div>
+
+          <div class="mixlab-meta-grid">
+            <div class="mixlab-meta-item">
+              <span class="mixlab-meta-label">Product</span>
+              <input type="text" class="mixlab-input" id="ml-product" readonly style="color:var(--text-muted)">
+            </div>
+            <div class="mixlab-meta-item">
+              <span class="mixlab-meta-label">Batch Name</span>
+              <input type="text" class="mixlab-input" id="ml-batch" placeholder="Trial 1">
+            </div>
+            <div class="mixlab-meta-item">
+              <span class="mixlab-meta-label">Required</span>
+              <input type="text" class="mixlab-input" id="ml-required" value="100 kg" oninput="recalcMixlab()">
+            </div>
+            <div class="mixlab-meta-item">
+              <span class="mixlab-meta-label">Gloss</span>
+              <input type="text" class="mixlab-input" id="ml-gloss" placeholder="—">
+            </div>
+            <div class="mixlab-meta-item">
+              <span class="mixlab-meta-label">Viscosity</span>
+              <input type="text" class="mixlab-input" id="ml-viscosity" placeholder="—">
+            </div>
+          </div>
+
+          <div class="mixlab-cards">
+            <div class="mixlab-card">
+              <div class="mixlab-card-val" id="ml-total-cost">Rs. 0.00</div>
+              <div class="mixlab-card-label">Total Material Cost</div>
+            </div>
+            <div class="mixlab-card">
+              <div class="mixlab-card-val" id="ml-cost-kg">Rs. 0.00</div>
+              <div class="mixlab-card-label">Cost Per KG</div>
+            </div>
+          </div>
+
+          <table class="mixlab-table">
+            <thead>
+              <tr>
+                <th>Ingredient</th>
+                <th>Supplier</th>
+                <th>Code</th>
+                <th style="text-align:right">Weight</th>
+                <th style="text-align:right">Rate/Kg</th>
+                <th style="text-align:right">Cost</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="ml-rows">
+            </tbody>
+          </table>
+
+          <div class="mixlab-add-row">
+            <button class="btn btn-ghost btn-sm" onclick="addMixlabRow()">+ Add Ingredient</button>
+          </div>
+        </div>
+
+        <div id="print-only-proforma" style="display:none"></div>
+      </div>
+
+      </div><!-- end .content -->
+  </div><!-- end .main -->
+
+  <!-- ══════════════ MODALS ══════════════ -->
+
+  <!-- ADD / EDIT RM -->
+  <div class="modal-overlay" id="modal-rm">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="rm-modal-title">Add Raw Material</div>
+        <button class="modal-close" onclick="closeModal('modal-rm')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">Material Name *</label><input class="form-input"
+            id="fi-rm-name" placeholder="e.g. Glycerin"></div>
+        <div class="form-group"><label class="form-label">Supplier *</label>
+          <select class="form-select" id="fi-rm-supplier">
+            <option value="">Select supplier…</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Price Purchased (₹ / kg) *</label><input class="form-input"
+            id="fi-rm-price" placeholder="0.00" type="number" step="0.01" min="0"></div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-rm')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveRM()">Save Material</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD PRODUCT -->
+  <div class="modal-overlay" id="modal-product">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="prod-modal-title">New Product</div>
+        <button class="modal-close" onclick="closeModal('modal-product')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Product Code *</label><input class="form-input"
+              id="fi-prod-code" placeholder="PRD-001"></div>
+          <div class="form-group"><label class="form-label">Product Name *</label><input class="form-input"
+              id="fi-prod-name" placeholder="Hydrating Day Cream"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Category</label>
+            <select class="form-select" id="fi-prod-cat">
+              <option value="">Select…</option>
+              <option>Cream</option>
+              <option>Lotion</option>
+              <option>Serum</option>
+              <option>Gel</option>
+              <option>Shampoo</option>
+              <option>Conditioner</option>
+              <option>Cleanser</option>
+              <option>Mask</option>
+              <option>Oil</option>
+              <option>Tablet</option>
+              <option>Capsule</option>
+              <option>Syrup</option>
+              <option>Powder</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Standard Batch Size (g/ml)</label><input class="form-input"
+              id="fi-prod-bs" placeholder="500" type="number"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Target Profile / Description</label><textarea
+            class="form-textarea" id="fi-prod-desc"
+            placeholder="Intended use, performance claims, target audience…"></textarea></div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-product')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveProduct()">Create Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD BATCH -->
+  <!-- ADD SUPPLIER -->
+  <div class="modal-overlay" id="modal-supplier">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Add Supplier</div>
+        <button class="modal-close" onclick="closeModal('modal-supplier')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Supplier Name *</label><input class="form-input"
+              id="fi-sup-name" placeholder="Sigma-Aldrich"></div>
+          <div class="form-group"><label class="form-label">Short Code</label><input class="form-input" id="fi-sup-code"
+              placeholder="SA" maxlength="4"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Country</label><input class="form-input" id="fi-sup-country"
+              placeholder="Germany"></div>
+          <div class="form-group"><label class="form-label">Contact Email</label><input class="form-input"
+              id="fi-sup-email" placeholder="orders@supplier.com" type="email"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="fi-sup-phone"
+            placeholder="+91 98765 43210"></div>
+        <div class="form-group"><label class="form-label">Specialties / Notes</label><textarea class="form-textarea"
+            id="fi-sup-notes" placeholder="Lead times, certifications (ISO, GMP), preferred categories…"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-supplier')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveSupplier()">Save Supplier</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCORE ENTRY MODAL -->
+  <div class="modal-overlay" id="modal-scores">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Enter Test Scores</div>
+        <button class="modal-close" onclick="closeModal('modal-scores')">×</button>
+      </div>
+      <div class="modal-body" id="score-modal-body">
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- FLOATING ACTION BUTTON -->
+  <button class="fab" id="fab" onclick="fabAction()"></button>
+
+  <script>
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    const S = {
+      rms: [],
+      products: [],
+      suppliers: [],
+      activity: [],
+      currentPid: null,
+      currentBid: null,
+      rmFilter: 'all',
+      prodFilter: 'all',
+      editingRMId: null,
+      batchModalPid: null,
+    };
+
+    // ═══════════════════════════════════════
+    // SEED
+    // ═══════════════════════════════════════
+    function seed() {
+      S.suppliers = [
+        { id: 's1', name: 'Sigma-Aldrich', code: 'SA', country: 'Germany', email: 'orders@sigma.com', phone: '+49 800 123', notes: 'Pharma grade. Long lead time.', color: '#3B82F6' },
+        { id: 's2', name: 'BASF India', code: 'BI', country: 'India', email: 'india@basf.com', phone: '+91 22 6678', notes: 'Local supplier. Competitive pricing.', color: '#8B5CF6' },
+        { id: 's3', name: 'Brenntag', code: 'BR', country: 'Netherlands', email: 'info@brenntag.nl', phone: '+31 20 555', notes: 'Broad portfolio. Good SLA.', color: '#10B981' },
+        { id: 's4', name: 'Univar Solutions', code: 'UV', country: 'USA', email: 'sales@univar.com', phone: '+1 800 321', notes: 'GMP certified. Cosmetic grade.', color: '#F59E0B' },
+      ];
+      S.rms = [
+        { id: 'rm1',  name: 'Glycerin',        supplier: 's1', price: 120.00 },
+        { id: 'rm1b', name: 'Glycerin',        supplier: 's2', price: 108.00 },
+        { id: 'rm2',  name: 'Cetyl Alcohol',   supplier: 's2', price: 340.00 },
+        { id: 'rm2b', name: 'Cetyl Alcohol',   supplier: 's3', price: 360.00 },
+        { id: 'rm3',  name: 'Phenoxyethanol',  supplier: 's1', price: 890.50 },
+        { id: 'rm3b', name: 'Phenoxyethanol',  supplier: 's4', price: 820.00 },
+        { id: 'rm4',  name: 'Sodium Hydroxide',supplier: 's1', price: 75.00  },
+        { id: 'rm5',  name: 'Water (DI)',       supplier: 's3', price: 5.00   },
+        { id: 'rm6',  name: 'Carbomer 940',    supplier: 's2', price: 560.00 },
+        { id: 'rm7',  name: 'Niacinamide',     supplier: 's1', price: 1250.00},
+        { id: 'rm7b', name: 'Niacinamide',     supplier: 's4', price: 1100.00},
+      ];
+      S.products = [
+        {
+          id: 'p1', code: 'PRD-001', name: 'Hydrating Day Cream', cat: 'Cream', batchSize: 500,
+          desc: 'Lightweight moisturizer targeting 48hr hydration. Suitable for all skin types.',
+          status: 'trial',
+          batches: [
+            {
+              id: 'b1', bid: 'PRD-001-T01', name: 'Trial 1 — Base Formula', size: 100, type: 'formula',
+              status: 'passed', notes: 'Good texture and spreadability. Slight stickiness — reduce glycerin next batch.',
+              supplierTest: null,
+              formula: [{ rmId: 'rm5', qty: 72, pct: 72 }, { rmId: 'rm1', qty: 8, pct: 8 }, { rmId: 'rm2', qty: 5, pct: 5 }, { rmId: 'rm6', qty: 0.8, pct: 0.8 }, { rmId: 'rm3', qty: 0.8, pct: 0.8 }]
+            },
+            {
+              id: 'b2', bid: 'PRD-001-T02', name: 'Trial 2 — Reduced Glycerin + Niacinamide', size: 100, type: 'formula',
+              status: 'testing', notes: 'Reducing glycerin to 5%, adding 5% niacinamide for brightening claim.',
+              supplierTest: null,
+              formula: [{ rmId: 'rm5', qty: 69, pct: 69 }, { rmId: 'rm1', qty: 5, pct: 5 }, { rmId: 'rm2', qty: 5, pct: 5 }, { rmId: 'rm7', qty: 5, pct: 5 }, { rmId: 'rm6', qty: 0.8, pct: 0.8 }, { rmId: 'rm3', qty: 0.8, pct: 0.8 }]
+            },
+            {
+              id: 'b3', bid: 'PRD-001-S01', name: 'Supplier Test — Glycerin (SA vs BI)', size: 100, type: 'supplier',
+              status: 'testing', notes: 'Using T01 base formula. Comparing Sigma-Aldrich glycerin vs BASF India on purity, skin-feel, viscosity and cost.',
+              supplierTest: { rmId: 'rm1', supA: 's1', supB: 's2', scores: { s1: { purity: 97, sensory: 89, viscosity: 92, cost: 58 }, s2: { purity: 94, sensory: 91, viscosity: 88, cost: 86 } } },
+              formula: [{ rmId: 'rm5', qty: 72, pct: 72 }, { rmId: 'rm1', qty: 8, pct: 8 }, { rmId: 'rm2', qty: 5, pct: 5 }, { rmId: 'rm6', qty: 0.8, pct: 0.8 }, { rmId: 'rm3', qty: 0.8, pct: 0.8 }]
+            },
+          ]
+        }
+      ];
+      S.activity = [
+        { msg: 'Created batch PRD-001-T02 for Hydrating Day Cream', color: '#3B82F6', time: '2 hrs ago' },
+        { msg: 'Supplier test batch PRD-001-S01 added', color: S.suppliers[0].color, time: '5 hrs ago' },
+        { msg: 'PRD-001-T01 marked as Passed', color: '#10B981', time: 'Yesterday' },
+        { msg: 'New product PRD-001 created', color: '#8B5CF6', time: '2 days ago' },
+      ];
+      syncCounts();
+    }
+
+    // ═══════════════════════════════════════
+    // NAVIGATION
+    // ═══════════════════════════════════════
+    function navTo(viewId, navEl) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + viewId).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (navEl) navEl.classList.add('active');
+
+      const map = {
+        dashboard: ['Dashboard', 'Overview & Activity'],
+        rawmaterials: ['Raw Materials', 'Ingredient Library'],
+        products: ['Proforma Invoice', 'Select a product to generate an invoice'],
+        proforma: ['Proforma Invoice', 'Material Cost Estimate'],
+        'rm-detail': ['Raw Material Detail', ''],
+        'product-detail': ['Product', ''],
+        'batch-detail': ['Batch Detail', ''],
+      };
+      const [t, s] = map[viewId] || [viewId, ''];
+      setTopbar(t, s);
+      document.getElementById('tb-actions').innerHTML = '';
+
+      // FAB visibility
+      const fab = document.getElementById('fab');
+      const fabMap = { rawmaterials: 'openRMModal()', products: 'openProductModal()' };
+      const fabLabels = { rawmaterials: 'Add RM', products: 'New Product' };
+      if (fabMap[viewId]) {
+        fab.innerHTML = '<span class="fab-icon">+</span>' + fabLabels[viewId];
+        fab._action = fabMap[viewId];
+        fab.classList.add('visible');
+      } else {
+        fab.classList.remove('visible');
+      }
+
+      if (viewId === 'dashboard') renderDashboard();
+      else if (viewId === 'rawmaterials') renderRMs();
+      else if (viewId === 'products') renderProducts();
+      else if (viewId === 'proforma') initProformaView();
+    }
+
+    // ── PROFORMA INVOICE ──
+    function initProformaView() {
+      const sel = document.getElementById('inv-product');
+      const prev = sel.value;
+      sel.innerHTML = '<option value="">Select product…</option>' +
+        S.products.map(p => `<option value="${p.id}">${p.code} — ${p.name}</option>`).join('');
+      if (prev) sel.value = prev;
+      onInvProductChange();
+    }
+
+    function onInvProductChange() {
+      const pid = document.getElementById('inv-product').value;
+      const bSel = document.getElementById('inv-batch');
+      bSel.innerHTML = '<option value="">Select batch…</option>';
+      if (!pid) { renderProforma(); return; }
+      const p = S.products.find(x => x.id === pid);
+      if (p && p.batches.length) {
+        p.batches.forEach(b => {
+          bSel.innerHTML += `<option value="${b.id}">${b.id} — ${b.name || 'Unnamed'}</option>`;
+        });
+      }
+      renderProforma();
+    }
+
+    function renderProforma() {
+      const pid = document.getElementById('inv-product').value;
+      const bid = document.getElementById('inv-batch').value;
+      const out = document.getElementById('proforma-output');
+
+      if (!pid || !bid) {
+        out.innerHTML = `<div class="empty-state" style="padding:60px 24px">
+          <div class="empty-icon" style="font-size:28px">📄</div>
+          <div class="empty-title">Select a product and batch</div>
+          <div class="empty-hint">The proforma invoice will appear here</div>
+        </div>`;
+        return;
+      }
+
+      const p = S.products.find(x => x.id === pid);
+      const b = p?.batches.find(x => x.id === bid);
+      if (!p || !b) return;
+
+      const batchSize = parseFloat(document.getElementById('inv-batchsize').value) || b.batchSize || 100;
+      const invNum = `RLX-${new Date().getFullYear()}-${String(Math.floor(Math.random()*9000)+1000)}`;
+      const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+
+      // Build rows
+      const rows = (b.formula || []).map((item, i) => {
+        const rm = S.rms.find(x => x.id === item.rmId);
+        const sup = rm ? S.suppliers.find(x => x.id === rm.supplier) : null;
+        const name = rm ? rm.name : (item.rmId || 'Unknown RM');
+        const supName = sup ? sup.name : '—';
+        const qty = parseFloat(item.qty) || 0;
+        const rate = rm?.price || 0;
+        const amt = (qty / 1000) * rate; // g → kg * ₹/kg
+        return { i: i + 1, name, supName, qty, rate, amt };
+      });
+
+      const subtotal = rows.reduce((a, r) => a + r.amt, 0);
+      const gst = subtotal * 0.18;
+      const grand = subtotal + gst;
+
+      const fmtINR = n => `₹${Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      out.innerHTML = `
+      <div class="inv-doc" id="inv-printable">
+        <div class="inv-header">
+          <div>
+            <div class="inv-brand">ROALUX<span style="display:inline-block;width:5px;height:5px;background:var(--amber);border-radius:50%;margin:0 2px 2px 4px;vertical-align:middle"></span></div>
+            <div class="inv-brand-sub">Roalux Paints &amp; Coatings &middot; Estimator</div>
+          </div>
+          <div class="inv-meta-block">
+            <div class="inv-title">Proforma Invoice</div>
+            <div class="inv-number">${invNum}</div>
+            <div class="inv-date">Date: ${today}</div>
+          </div>
+        </div>
+
+        <div class="inv-details">
+          <dl class="inv-detail-block">
+            <dt>Product</dt>
+            <dd>${p.name}</dd>
+            <dd class="sub">${p.code} &middot; ${p.cat || 'Formulation'}</dd>
+          </dl>
+          <dl class="inv-detail-block">
+            <dt>Batch Reference</dt>
+            <dd>${b.id}</dd>
+            <dd class="sub">Batch size: ${batchSize}g &middot; Status: ${b.status || 'trial'}</dd>
+          </dl>
+        </div>
+
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Raw Material</th>
+              <th>Supplier</th>
+              <th style="text-align:right">Qty (g)</th>
+              <th style="text-align:right">Rate (&#8377;/kg)</th>
+              <th style="text-align:right">Amount (&#8377;)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.length ? rows.map(r => `
+            <tr>
+              <td style="color:var(--text-muted);font-size:12px">${r.i}</td>
+              <td style="font-weight:600">${r.name}</td>
+              <td style="color:var(--text-muted)">${r.supName}</td>
+              <td style="text-align:right;font-variant-numeric:tabular-nums">${r.qty.toFixed(2)}</td>
+              <td style="text-align:right;font-variant-numeric:tabular-nums">${fmtINR(r.rate)}</td>
+              <td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">${fmtINR(r.amt)}</td>
+            </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">No formula rows in this batch</td></tr>`}
+          </tbody>
+        </table>
+
+        <div class="inv-totals">
+          <table>
+            <tr><td>Subtotal</td><td>${fmtINR(subtotal)}</td></tr>
+            <tr><td style="color:var(--text-muted)">GST @ 18%</td><td style="color:var(--text-muted)">${fmtINR(gst)}</td></tr>
+            <tr class="inv-grand"><td>Total Amount</td><td style="color:var(--amber-dim)">${fmtINR(grand)}</td></tr>
+          </table>
+        </div>
+
+        <div class="inv-footer">
+          <div class="inv-note">
+            This is a computer-generated proforma estimate.<br>
+            All prices are indicative and subject to change.<br>
+            Valid for 30 days from the date of issue.
+          </div>
+          <div class="inv-sign">
+            <div class="inv-sign-line"></div>
+            <div class="inv-sign-label">Authorised Signatory</div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function printInvoice() {
+      renderProforma();
+      setTimeout(() => window.print(), 100);
+    }
+
+    function setTopbar(title, sub, actions = '') {
+      document.getElementById('tb-title').textContent = title;
+      document.getElementById('tb-sub').textContent = sub;
+      document.getElementById('tb-actions').innerHTML = actions;
+    }
+
+    function printProformaFromBatch() {
+      const pid = S.currentPid;
+      const bid = S.currentBid;
+      const p = S.products.find(x => x.id === pid);
+      const b = p?.batches.find(x => x.id === bid);
+      if (!p || !b) return;
+
+      const batchSize = b.batchSize || 100;
+      const invNum = `RLX-${new Date().getFullYear()}-${String(Math.floor(Math.random()*9000)+1000)}`;
+      const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+
+      // Build rows
+      const rows = (b.formula || []).map((item, i) => {
+        const rm = S.rms.find(x => x.id === item.rmId);
+        const sup = rm ? S.suppliers.find(x => x.id === rm.supplier) : null;
+        const name = rm ? rm.name : (item.rmId || 'Unknown RM');
+        const supName = sup ? sup.name : '—';
+        const qty = parseFloat(item.qty) || 0;
+        const rate = rm?.price || 0;
+        const amt = (qty / 1000) * rate;
+        return { i: i + 1, name, supName, qty, rate, amt };
+      });
+
+      const subtotal = rows.reduce((a, r) => a + r.amt, 0);
+      const gst = subtotal * 0.18;
+      const grand = subtotal + gst;
+
+      const fmtINR = n => `₹${Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      document.getElementById('print-only-proforma').innerHTML = `
+      <div class="inv-doc">
+        <div class="inv-header">
+          <div>
+            <div class="inv-brand">ROALUX<span style="display:inline-block;width:5px;height:5px;background:var(--amber);border-radius:50%;margin:0 2px 2px 4px;vertical-align:middle"></span></div>
+            <div class="inv-brand-sub">Roalux Paints &amp; Coatings &middot; Estimator</div>
+          </div>
+          <div class="inv-meta-block">
+            <div class="inv-title">Proforma Invoice</div>
+            <div class="inv-number">${invNum}</div>
+            <div class="inv-date">Date: ${today}</div>
+          </div>
+        </div>
+
+        <div class="inv-details">
+          <dl class="inv-detail-block">
+            <dt>Product</dt>
+            <dd>${p.name}</dd>
+            <dd class="sub">${p.code} &middot; ${p.cat || 'Formulation'}</dd>
+          </dl>
+          <dl class="inv-detail-block">
+            <dt>Batch Reference</dt>
+            <dd>${b.id}</dd>
+            <dd class="sub">Batch size: ${batchSize}g &middot; Status: ${b.status || 'trial'}</dd>
+          </dl>
+        </div>
+
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Raw Material</th>
+              <th>Supplier</th>
+              <th style="text-align:right">Qty (g)</th>
+              <th style="text-align:right">Rate (&#8377;/kg)</th>
+              <th style="text-align:right">Amount (&#8377;)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.length ? rows.map(r => `
+            <tr>
+              <td style="color:var(--text-muted);font-size:12px">${r.i}</td>
+              <td style="font-weight:600">${r.name}</td>
+              <td style="color:var(--text-muted)">${r.supName}</td>
+              <td style="text-align:right;font-variant-numeric:tabular-nums">${r.qty.toFixed(2)}</td>
+              <td style="text-align:right;font-variant-numeric:tabular-nums">${fmtINR(r.rate)}</td>
+              <td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">${fmtINR(r.amt)}</td>
+            </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">No formula rows in this batch</td></tr>`}
+          </tbody>
+        </table>
+
+        <div class="inv-totals">
+          <table>
+            <tr><td>Subtotal</td><td>${fmtINR(subtotal)}</td></tr>
+            <tr><td style="color:var(--text-muted)">GST @ 18%</td><td style="color:var(--text-muted)">${fmtINR(gst)}</td></tr>
+            <tr class="inv-grand"><td>Total Amount</td><td style="color:var(--amber-dim)">${fmtINR(grand)}</td></tr>
+          </table>
+        </div>
+
+        <div class="inv-footer">
+          <div class="inv-note">
+            This is a computer-generated proforma estimate.<br>
+            All prices are indicative and subject to change.<br>
+            Valid for 30 days from the date of issue.
+          </div>
+          <div class="inv-sign">
+            <div class="inv-sign-line"></div>
+            <div class="inv-sign-label">Authorised Signatory</div>
+          </div>
+        </div>
+      </div>`;
+
+      setTimeout(() => window.print(), 100);
+    }
+
+    // ═══════════════════════════════════════
+    // COUNTS / SYNC
+    // ═══════════════════════════════════════
+    function syncCounts() {
+      document.getElementById('nb-rm').textContent = S.rms.length;
+      document.getElementById('nb-prod').textContent = S.products.length;
+            document.getElementById('ds-rm').textContent = S.rms.length;
+      document.getElementById('ds-prod').textContent = S.products.length;
+      const tb = S.products.reduce((a, p) => a + p.batches.length, 0);
+      const fin = S.products.reduce((a, p) => a + p.batches.filter(b => b.status === 'finalized').length, 0);
+      document.getElementById('ds-batches').textContent = tb;
+      document.getElementById('ds-final').textContent = fin;
+    }
+
+    function logActivity(msg, color = '#3B82F6') {
+      S.activity.unshift({ msg, color, time: 'Just now' });
+      if (S.activity.length > 20) S.activity.pop();
+    }
+
+    // ═══════════════════════════════════════
+    // DASHBOARD
+    // ═══════════════════════════════════════
+    function renderDashboard() {
+      syncCounts();
+      // Products table
+      const pt = document.getElementById('dash-products-table');
+      if (!S.products.length) {
+        pt.innerHTML = `<div class="empty-state"><div class="empty-icon">◈</div><div class="empty-title">No products yet</div></div>`;
+      } else {
+        pt.innerHTML = `<table class="data-table">
+      <thead><tr><th>Code</th><th>Product</th><th>Category</th><th>Batches</th><th>Status</th><th></th></tr></thead>
+      <tbody>${S.products.map(p => `<tr>
+        <td class="mono">${p.code}</td>
+        <td class="fw">${p.name}</td>
+        <td><span class="tag tag-blue">${p.cat || '—'}</span></td>
+        <td><span class="tag tag-gray" style="font-family:'IBM Plex Mono',monospace">${p.batches.length}</span></td>
+        <td>${pill(p.status)}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openProductDetail('${p.id}')">Open →</button></td>
+      </tr>`).join('')}
+      </tbody></table>`;
+      }
+      // Activity
+      const af = document.getElementById('dash-activity');
+      if (!S.activity.length) {
+        af.innerHTML = `<div class="empty-state" style="padding:24px 8px"><div class="empty-icon">📋</div><div class="empty-title">No activity yet</div></div>`;
+      } else {
+        af.innerHTML = S.activity.map(a => `<div class="activity-item">
+      <div class="activity-dot" style="background:${a.color}"></div>
+      <div><div class="activity-text">${a.msg}</div><div class="activity-time">${a.time}</div></div>
+    </div>`).join('');
+      }
+    }
+
+    // ═══════════════════════════════════════
+    // RAW MATERIALS
+    // ═══════════════════════════════════════
+    let rmFilterActive = 'all';
+    function setRMFilter(f, el) {
+      rmFilterActive = f;
+      document.querySelectorAll('[id^=rmf-]').forEach(e => e.classList.remove('active'));
+      if (el) el.classList.add('active');
+      renderRMs();
+    }
+
+    function renderRMs() {
+      const q = (document.getElementById('rm-search')?.value || '').toLowerCase();
+      let list = S.rms.filter(rm => {
+        if (rmFilterActive !== 'all' && rm.cat !== rmFilterActive) return false;
+        if (q) return rm.name.toLowerCase().includes(q) || rm.code.toLowerCase().includes(q) || rm.cat.toLowerCase().includes(q) || (rm.inci || '').toLowerCase().includes(q);
+        return true;
+      });
+      const grid = document.getElementById('rm-grid');
+      if (!list.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⬡</div><div class="empty-title">No raw materials found</div><div class="empty-hint">Add your first ingredient to build formulas</div></div>`;
+        return;
+      }
+      // Column header row
+      const header = `<div style="display:flex;align-items:center;padding:5px 18px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted)">
+        <div style="flex:1">Material</div>
+        <div style="flex:0 0 200px">Supplier</div>
+        <div style="flex:0 0 140px;text-align:right">Price / kg</div>
+      </div>`;
+      grid.innerHTML = header + list.map(rm => {
+        const sup = S.suppliers.find(x => x.id === rm.supplier);
+        const priceDisplay = rm.price != null
+          ? `₹${Number(rm.price).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+          : '—';
+        return `<div class="rm-card" onclick="openRMDetail('${rm.id}')">
+          <div style="flex:1;min-width:0">
+            <span style="font-size:14px;font-weight:600;color:var(--text)">${rm.name}</span>
+          </div>
+          <div style="flex:0 0 200px">
+            ${sup
+              ? `<span style="font-size:12px;color:var(--text-muted);font-weight:500">${sup.name}</span>`
+              : '<span style="font-size:12px;color:#C0C0BA">No supplier</span>'}
+          </div>
+          <div style="flex:0 0 140px;text-align:right;font-size:14px;font-weight:700;color:var(--amber-dim);letter-spacing:-0.3px">${priceDisplay}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // RM DETAIL
+    function openRMDetail(id) {
+      const rm = S.rms.find(x => x.id === id);
+      if (!rm) return;
+      document.getElementById('rm-detail-back').onclick = () => navTo('rawmaterials', document.querySelector('[data-view=rawmaterials]'));
+      const supDetail = S.suppliers.find(x => x.id === rm.supplier);
+      const priceDisplay = rm.price != null ? `₹${Number(rm.price).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '—';
+
+      // Used in products
+      const usedIn = S.products.filter(p => p.batches.some(b => b.formula.some(r => r.rmId === rm.id)));
+      const usedRows = usedIn.map(p => `<tr>
+    <td class="mono">${p.code}</td><td class="fw">${p.name}</td>
+    <td>${pill(p.status)}</td>
+    <td><button class="btn btn-ghost btn-sm" onclick="openProductDetail('${p.id}')">View →</button></td>
+  </tr>`).join('');
+
+      document.getElementById('rm-detail-content').innerHTML = `
+    <div class="detail-layout">
+      <div class="detail-main">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Raw Material Info</span>
+            <button class="btn btn-ghost btn-sm" onclick="openRMModal('${rm.id}')">Edit</button>
+          </div>
+          <div class="panel-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+            <div class="info-row"><div class="info-label">Material Name</div><div class="info-value">${rm.name}</div></div>
+            <div class="info-row"><div class="info-label">Supplier</div><div class="info-value">${supDetail ? supDetail.name : '&mdash;'}</div></div>
+            <div class="info-row"><div class="info-label">Price Purchased</div><div class="info-value mono" style="color:var(--amber-dim)">${priceDisplay}</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Used In Products</span></div>
+          ${usedIn.length ? `<table class="data-table"><thead><tr><th>Code</th><th>Product</th><th>Status</th><th></th></tr></thead><tbody>${usedRows}</tbody></table>`
+          : `<div class="empty-state"><div class="empty-icon">◈</div><div class="empty-title">Not used in any product yet</div></div>`}
+        </div>
+      </div>
+    </div>`;
+
+
+      setTopbar(rm.name, supDetail ? supDetail.name : '');
+      navTo('rm-detail', null);
+    }
+
+    // ═══════════════════════════════════════
+    // PRODUCTS
+    // ═══════════════════════════════════════
+    let prodFilterActive = 'all';
+    function setProdFilter(f, el) {
+      prodFilterActive = f;
+      document.querySelectorAll('[id^=pf-]').forEach(e => e.classList.remove('active'));
+      if (el) el.classList.add('active');
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const q = (document.getElementById('prod-search')?.value || '').toLowerCase();
+      let list = S.products.filter(p => {
+        if (prodFilterActive !== 'all' && p.status !== prodFilterActive) return false;
+        if (q) return p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
+        return true;
+      });
+      const grid = document.getElementById('product-grid');
+      if (!list.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">◈</div><div class="empty-title">No products found</div><div class="empty-hint">Create a product to track trial batches</div></div>`;
+        return;
+      }
+      grid.innerHTML = list.map(p => {
+        const passed = p.batches.filter(b => b.status === 'passed' || b.status === 'finalized').length;
+        return `<div class="product-card s-${p.status}" onclick="openProductDetail('${p.id}')">
+      <div class="prod-accent"></div>
+      <div style="padding-left:8px">
+        <div class="prod-header">
+          <div>
+            <div class="prod-code">${p.code}</div>
+            <div class="prod-name">${p.name}</div>
+            <div class="prod-cat">${p.cat || '—'}</div>
+          </div>
+          ${pill(p.status)}
+        </div>
+        <div class="prod-stats">
+          <div class="ps-item"><div class="ps-val">${p.batches.length}</div><div class="ps-label">Batches</div></div>
+          <div class="ps-div"></div>
+          <div class="ps-item"><div class="ps-val" style="color:var(--green)">${passed}</div><div class="ps-label">Passed</div></div>
+          ${p.batchSize ? `<div class="ps-div"></div><div class="ps-item"><div class="ps-val" style="font-size:14px">${p.batchSize}g</div><div class="ps-label">Batch Sz</div></div>` : ''}
+        </div>
+        ${p.desc ? `<div class="prod-desc">${p.desc.substring(0, 90)}${p.desc.length > 90 ? '…' : ''}</div>` : ''}
+      </div>
+    </div>`;
+      }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // PRODUCT DETAIL
+    // ═══════════════════════════════════════
+    function openProductDetail(pid) {
+      const p = S.products.find(x => x.id === pid);
+      if (!p) return;
+      S.currentPid = pid;
+      document.getElementById('pd-breadcrumb').textContent = p.name;
+      
+      navTo('product-detail'); // MUST be called before setTopbar
+      
+      setTopbar(p.name, p.code + ' · ' + p.cat,
+        `<button class="btn btn-ghost btn-sm" onclick="duplicateBatch('${pid}')">⊕ Duplicate Last Batch</button>
+     <button class="btn btn-primary" onclick="createNewBatch('${pid}')">+ New Trial Batch</button>`);
+
+      const formulaBatches = p.batches.filter(b => b.type === 'formula');
+      const batchRows = formulaBatches.map(b => {
+        return `<tr>
+      <td class="mono">${b.bid}</td>
+      <td class="fw" style="max-width:200px">${b.name}</td>
+      <td>${pill(b.status)}</td>
+      <td class="mono" style="font-size:11px">${b.formula?.length || 0} RMs, ${b.size || 100}g</td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-ghost btn-sm" onclick="openBatchDetail('${p.id}','${b.id}')">View</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickStatus('${p.id}','${b.id}','passed')" style="color:var(--green);border-color:#A7F3D0" title="Mark Passed">✓</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickStatus('${p.id}','${b.id}','failed')" style="color:var(--red);border-color:#FECACA" title="Mark Failed">✗</button>
+        </div>
+      </td>
+    </tr>`;
+      }).join('');
+
+      document.getElementById('pd-layout').innerHTML = `
+    <div class="detail-main">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Formula Trials</span></div>
+        <div id="pd-batch-list">
+          ${formulaBatches.length ? `<table class="data-table" id="pd-batches-table-${p.id}">
+            <thead><tr><th>Batch ID</th><th>Name</th><th>Status</th><th>Formula</th><th>Actions</th></tr></thead>
+            <tbody>${batchRows}</tbody>
+          </table>`
+          : `<div class="empty-state"><div class="empty-icon">🧪</div><div class="empty-title">No batches yet</div><div class="empty-hint">Click "+ New Trial Batch" to begin</div></div>`}
+        </div>
+      </div>
+    </div>
+    <div class="detail-side">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Product Info</span>
+          <button class="btn btn-ghost btn-sm" onclick="openProductModal('${p.id}')">Edit</button>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:12px">
+          <div class="info-row"><div class="info-label">Status</div><div style="margin-top:3px">${pill(p.status)}</div></div>
+          <div class="divider"></div>
+          <div class="info-row"><div class="info-label">Batch Size</div><div class="info-value mono">${p.batchSize ? p.batchSize + 'g' : '—'}</div></div>
+          <div class="divider"></div>
+          <div class="info-row"><div class="info-label">Description</div><div style="font-size:12px;color:var(--text-muted);line-height:1.5;margin-top:3px">${p.desc || '—'}</div></div>
+        </div>
+      </div>
+    </div>`;
+    }
+
+    // ═══════════════════════════════════════
+    // MIXLAB EDITABLE PRICE ESTIMATE
+    // ═══════════════════════════════════════
+    let _activeBid = null;
+
+        function openBatchDetail(pid, bid) {
+      const p = S.products.find(x => x.id === pid);
+      const b = p.batches.find(x => x.id === bid);
+      if (!p || !b) return;
+      S.currentPid = pid; S.currentBid = bid;
+      _activeBid = bid;
+
+      navTo('batch-detail', null); // MUST be called before setTopbar
+
+      document.getElementById('bd-back').onclick = () => openProductDetail(pid);
+      document.getElementById('bd-breadcrumb').textContent = b.bid;
+      setTopbar(b.bid, b.name, '');
+
+      // Populate Meta
+      document.getElementById('ml-product').value = p.name;
+      document.getElementById('ml-batch').value = b.name;
+      document.getElementById('ml-required').value = b.size || 100;
+      document.getElementById('ml-gloss').value = b.gloss || '';
+      document.getElementById('ml-viscosity').value = b.viscosity || '';
+      
+      const dt = new Date().toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: '2-digit'});
+      document.getElementById('ml-date').textContent = 'Modified: ' + dt;
+
+      // Render Rows
+      const tbody = document.getElementById('ml-rows');
+      tbody.innerHTML = '';
+      if (!b.formula || b.formula.length === 0) {
+        addMixlabRow();
+      } else {
+        b.formula.forEach(row => addMixlabRow(row.rmId, row.qty));
+      }
+
+      recalcMixlab();
+      
+    }
+
+    function createNewBatch(pid) {
+      const p = S.products.find(x => x.id === pid);
+      const nextN = (p.batches.length + 1).toString().padStart(2, '0');
+      const bid = `${p.code}-T${nextN}`;
+      const b = {
+        id: 'b' + Date.now(),
+        bid: bid,
+        name: 'Trial ' + nextN,
+        type: 'formula',
+        size: p.batchSize || 100,
+        status: 'draft',
+        notes: '',
+        gloss: '',
+        viscosity: '',
+        formula: []
+      };
+      p.batches.push(b);
+      openBatchDetail(pid, b.id);
+    }
+
+    function addMixlabRow(rmId = '', qty = '') {
+      const tbody = document.getElementById('ml-rows');
+      const tr = document.createElement('tr');
+      tr.className = 'ml-row';
+      
+      const rmOpts = '<option value="">Select Ingredient...</option>' + S.rms.map(r => `<option value="${r.id}" ${r.id === rmId ? 'selected' : ''}>${r.name}</option>`).join('');
+      
+      tr.innerHTML = `
+        <td><select class="mixlab-rm-select ml-rm-sel" onchange="updateMixlabRowInfo(this)">${rmOpts}</select></td>
+        <td class="ml-sup-col" style="color:var(--text-muted)">—</td>
+        <td class="ml-code-col mono" style="color:var(--text-muted)">—</td>
+        <td style="text-align:right"><input type="number" class="mixlab-input mixlab-num-input ml-qty" placeholder="0" value="${qty}" oninput="recalcMixlab()"></td>
+        <td class="ml-rate-col mono" style="text-align:right;color:var(--text-muted)">—</td>
+        <td class="ml-cost-col mono" style="text-align:right;font-weight:600">0.00</td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="this.closest('tr').remove();recalcMixlab()" style="color:var(--red)">×</button></td>
+      `;
+      tbody.appendChild(tr);
+      if (rmId) updateMixlabRowInfo(tr.querySelector('.ml-rm-sel'));
+    }
+
+    function updateMixlabRowInfo(selectEl) {
+      const tr = selectEl.closest('tr');
+      const rmId = selectEl.value;
+      const rm = S.rms.find(x => x.id === rmId);
+      if (rm) {
+        const sup = S.suppliers.find(x => x.id === rm.supplier);
+        tr.querySelector('.ml-sup-col').textContent = sup ? sup.name : 'Unknown';
+        tr.querySelector('.ml-code-col').textContent = rm.code;
+        tr.querySelector('.ml-rate-col').textContent = fmtKg(rm.priceHistory[0]?.price || 0);
+      } else {
+        tr.querySelector('.ml-sup-col').textContent = '—';
+        tr.querySelector('.ml-code-col').textContent = '—';
+        tr.querySelector('.ml-rate-col').textContent = '—';
+      }
+      recalcMixlab();
+    }
+
+    function recalcMixlab() {
+      let totalCost = 0;
+      let totalQty = 0;
+      
+      document.querySelectorAll('#ml-rows .ml-row').forEach(tr => {
+        const rmId = tr.querySelector('.ml-rm-sel').value;
+        const qty = parseFloat(tr.querySelector('.ml-qty').value) || 0;
+        let cost = 0;
+        if (rmId && qty > 0) {
+          const rm = S.rms.find(x => x.id === rmId);
+          const rate = rm?.priceHistory[0]?.price || 0;
+          // rate is per kg. qty is in g (based on earlier context, but let's assume inputs are Kg if not specified, wait Roalux estimator used grams for batch size. Let's assume rate is per kg, qty is in grams)
+          // Ah, mockup says "Required: 100 kg". The user wanted to transition to Kg?
+          // Let's assume input is in Kg now for R&D scale up, or grams.
+          // In previous code: rate was per kg, price per gram = rate / 1000.
+          // Wait, if Required is "100 kg", the unit is kg. Let's just do cost = qty * rate.
+          cost = qty * rate; 
+          totalQty += qty;
+        }
+        tr.querySelector('.ml-cost-col').textContent = cost > 0 ? fmtMoney(cost) : '0.00';
+        totalCost += cost;
+      });
+
+      document.getElementById('ml-total-cost').textContent = 'Rs. ' + fmtMoney(totalCost);
+      const req = parseFloat(document.getElementById('ml-required').value) || totalQty || 1;
+      const costPerKg = (totalCost / req) || 0;
+      document.getElementById('ml-cost-kg').textContent = 'Rs. ' + fmtMoney(costPerKg);
+    }
+
+    function saveMixlabBatch() {
+      if (!S.currentPid || !_activeBid) return;
+      const p = S.products.find(x => x.id === S.currentPid);
+      const b = p.batches.find(x => x.id === _activeBid);
+      
+      b.name = document.getElementById('ml-batch').value.trim() || b.bid;
+      b.size = parseFloat(document.getElementById('ml-required').value) || 100;
+      b.gloss = document.getElementById('ml-gloss').value.trim();
+      b.viscosity = document.getElementById('ml-viscosity').value.trim();
+      
+      b.formula = [];
+      document.querySelectorAll('#ml-rows .ml-row').forEach(tr => {
+        const rmId = tr.querySelector('.ml-rm-sel').value;
+        const qty = parseFloat(tr.querySelector('.ml-qty').value) || 0;
+        if (rmId && qty > 0) {
+          // calculate pct
+          const pct = (qty / b.size) * 100;
+          b.formula.push({ rmId, qty, pct });
+        }
+      });
+      
+      if (p.status === 'development') p.status = 'trial';
+      toast('Batch saved successfully', 'success');
+      syncCounts();
+    }
+
+    function duplicateBatch(pid) {
+      const p = S.products.find(x => x.id === pid);
+      if (!p.batches.length) return toast('No batches to duplicate', 'error');
+      const last = p.batches[p.batches.length - 1];
+      const nextN = (p.batches.length + 1).toString().padStart(2, '0');
+      const bid = `${p.code}-T${nextN}`;
+      const b = JSON.parse(JSON.stringify(last));
+      b.id = 'b' + Date.now();
+      b.bid = bid;
+      b.name = 'Trial ' + nextN + ' (Copy)';
+      b.status = 'draft';
+      p.batches.push(b);
+      openBatchDetail(pid, b.id);
+    }
+
+    // ─── SUPPLIER MODAL ───
+    function openSupplierModal() {
+      ['fi-sup-name', 'fi-sup-code', 'fi-sup-country', 'fi-sup-email', 'fi-sup-phone', 'fi-sup-notes'].forEach(id => document.getElementById(id).value = '');
+      openModal('modal-supplier');
+    }
+
+    function saveSupplier() {
+      const name = document.getElementById('fi-sup-name').value.trim();
+      if (!name) { toast('Supplier name is required', 'error'); return; }
+      const palette = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4', '#D97706', '#EC4899', '#14B8A6'];
+      const s = {
+        id: 's' + Date.now(),
+        name,
+        code: (document.getElementById('fi-sup-code').value.trim() || name.substring(0, 2)).toUpperCase(),
+        country: document.getElementById('fi-sup-country').value.trim(),
+        email: document.getElementById('fi-sup-email').value.trim(),
+        phone: document.getElementById('fi-sup-phone').value.trim(),
+        notes: document.getElementById('fi-sup-notes').value.trim(),
+        color: palette[S.suppliers.length % palette.length],
+      };
+      S.suppliers.push(s);
+      logActivity(`New supplier added: ${name}`, '#10B981');
+      toast(`Supplier added: ${name}`, 'success');
+      closeModal('modal-supplier');
+      syncCounts();
+      renderSuppliers();
+    }
+
+    // ═══════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════
+    function pill(status) {
+      const m = {
+        draft: ['pill-draft', 'Draft'], testing: ['pill-testing', 'Testing'],
+        passed: ['pill-passed', 'Passed'], failed: ['pill-failed', 'Failed'],
+        finalized: ['pill-finalized', 'Finalized'], development: ['pill-development', 'Development'],
+        trial: ['pill-trial', 'In Trial'],
+      };
+      const [cls, label] = m[status] || ['pill-draft', status];
+      return `<span class="status-pill ${cls}">${label}</span>`;
+    }
+
+    function toast(msg, type = '') {
+      const t = document.getElementById('toast');
+      const icon = type === 'error' ? '⚠ ' : type === 'success' ? '✓ ' : '● ';
+      t.textContent = icon + msg;
+      t.className = 'toast' + (type ? ' ' + type : '');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    // Close modals on background click
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    seed();
+    setRMFilter('all', document.getElementById('rmf-all'));
+    setProdFilter('all', document.getElementById('pf-all'));
+    renderDashboard();
+  </script>
+
+  <!-- HIDDEN PRINTABLE INVOICE -->
+  <div id="print-only-proforma" style="display:none"></div>
+</body>
+
+</html>
