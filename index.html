@@ -2003,23 +2003,71 @@
     }
     .mixlab-rm-select {
       width: 100%;
-      border: 1px solid transparent;
-      background: transparent;
-      padding: 4px;
-      margin: -4px;
+      border: 1px solid #E2E8F0;
+      background: #F8FAFC;
+      padding: 8px 12px;
+      border-radius: 6px;
       font-family: inherit;
       font-size: 13px;
       font-weight: 600;
       color: #1A1A1A;
+      transition: all 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 14px;
     }
-    .mixlab-rm-select:hover, .mixlab-rm-select:focus {
-      border-color: #E2E8F0;
-      background: white;
+    .mixlab-rm-select:hover {
+      border-color: #CBD5E1;
+      background: #F1F5F9;
+    }
+    .mixlab-rm-select:focus {
+      border-color: #3B82F6;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+      outline: none;
     }
     .mixlab-num-input {
       width: 80px;
       text-align: right;
       font-family: 'IBM Plex Mono', monospace;
+      border: 1px solid #E2E8F0;
+      background: #F8FAFC;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .mixlab-num-input:hover {
+      border-color: #CBD5E1;
+      background: #F1F5F9;
+    }
+    .mixlab-num-input:focus {
+      border-color: #3B82F6;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+      outline: none;
+    }
+    .mixlab-del-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #94A3B8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mixlab-del-btn:hover {
+      background: #FEF2F2;
+      border-color: #FECACA;
+      color: #EF4444;
     }
     .mixlab-add-row {
       margin-top: 16px;
@@ -3073,13 +3121,13 @@
       
       tr.innerHTML = `
         <td>
-          <select class="mixlab-rm-select ml-rm-sel" onchange="updateMixlabRowInfo(this)" style="margin-bottom:2px">${rmOpts}</select>
-          <div class="ml-sup-label" style="font-size: 11px; color: #666; padding-left: 4px;"></div>
+          <select class="mixlab-rm-select ml-rm-sel" onchange="updateMixlabRowInfo(this)" style="margin-bottom:4px">${rmOpts}</select>
+          <div class="ml-sup-label" style="font-size: 11px; color: #94A3B8; padding-left: 4px; font-weight: 500;"></div>
         </td>
-        <td style="text-align:right"><input type="number" class="mixlab-input mixlab-num-input ml-qty" placeholder="0" value="${qty}" oninput="recalcMixlab()"></td>
-        <td class="ml-rate-col mono" style="text-align:right;color:var(--text-muted)">—</td>
-        <td class="ml-cost-col mono" style="text-align:right;font-weight:600">0.00</td>
-        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="this.closest('tr').remove();recalcMixlab()" style="color:var(--red)">×</button></td>
+        <td style="text-align:right"><input type="number" class="mixlab-num-input ml-qty" placeholder="0" value="${qty}" oninput="recalcMixlab()"></td>
+        <td class="ml-rate-col mono" style="text-align:right;color:var(--text-muted);font-size:13px">—</td>
+        <td class="ml-cost-col mono" style="text-align:right;font-weight:600;font-size:14px;color:#0F172A">0.00</td>
+        <td style="text-align:right"><button class="mixlab-del-btn" onclick="this.closest('tr').remove();recalcMixlab()" title="Remove Ingredient">×</button></td>
       `;
       tbody.appendChild(tr);
       if (rmId) updateMixlabRowInfo(tr.querySelector('.ml-rm-sel'));
