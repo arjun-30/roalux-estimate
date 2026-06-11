@@ -2228,23 +2228,10 @@
             </div>
           </div>
 
-          <div class="mixlab-cards">
-            <div class="mixlab-card">
-              <div class="mixlab-card-val" id="ml-total-cost">Rs. 0.00</div>
-              <div class="mixlab-card-label">Total Material Cost</div>
-            </div>
-            <div class="mixlab-card">
-              <div class="mixlab-card-val" id="ml-cost-kg">Rs. 0.00</div>
-              <div class="mixlab-card-label">Cost Per KG</div>
-            </div>
-          </div>
-
           <table class="mixlab-table">
             <thead>
               <tr>
                 <th>Ingredient</th>
-                <th>Supplier</th>
-                <th>Code</th>
                 <th style="text-align:right">Weight</th>
                 <th style="text-align:right">Rate/Kg</th>
                 <th style="text-align:right">Cost</th>
@@ -3079,12 +3066,16 @@
       const tr = document.createElement('tr');
       tr.className = 'ml-row';
       
-      const rmOpts = '<option value="">Select Ingredient...</option>' + S.rms.map(r => `<option value="${r.id}" ${r.id === rmId ? 'selected' : ''}>${r.name}</option>`).join('');
+      const rmOpts = '<option value="">Select Ingredient...</option>' + S.rms.map(r => {
+        const sup = S.suppliers.find(x => x.id === r.supplier);
+        return `<option value="${r.id}" ${r.id === rmId ? 'selected' : ''}>${r.name} (${sup ? sup.name : 'Unknown'})</option>`;
+      }).join('');
       
       tr.innerHTML = `
-        <td><select class="mixlab-rm-select ml-rm-sel" onchange="updateMixlabRowInfo(this)">${rmOpts}</select></td>
-        <td class="ml-sup-col" style="color:var(--text-muted)">—</td>
-        <td class="ml-code-col mono" style="color:var(--text-muted)">—</td>
+        <td>
+          <select class="mixlab-rm-select ml-rm-sel" onchange="updateMixlabRowInfo(this)" style="margin-bottom:2px">${rmOpts}</select>
+          <div class="ml-sup-label" style="font-size: 11px; color: #666; padding-left: 4px;"></div>
+        </td>
         <td style="text-align:right"><input type="number" class="mixlab-input mixlab-num-input ml-qty" placeholder="0" value="${qty}" oninput="recalcMixlab()"></td>
         <td class="ml-rate-col mono" style="text-align:right;color:var(--text-muted)">—</td>
         <td class="ml-cost-col mono" style="text-align:right;font-weight:600">0.00</td>
@@ -3098,14 +3089,13 @@
       const tr = selectEl.closest('tr');
       const rmId = selectEl.value;
       const rm = S.rms.find(x => x.id === rmId);
+      const supLabel = tr.querySelector('.ml-sup-label');
       if (rm) {
         const sup = S.suppliers.find(x => x.id === rm.supplier);
-        tr.querySelector('.ml-sup-col').textContent = sup ? sup.name : 'Unknown';
-        tr.querySelector('.ml-code-col').textContent = rm.code;
+        supLabel.textContent = sup ? sup.name : 'Unknown';
         tr.querySelector('.ml-rate-col').textContent = fmtKg(rm.priceHistory[0]?.price || 0);
       } else {
-        tr.querySelector('.ml-sup-col').textContent = '—';
-        tr.querySelector('.ml-code-col').textContent = '—';
+        supLabel.textContent = '';
         tr.querySelector('.ml-rate-col').textContent = '—';
       }
       recalcMixlab();
