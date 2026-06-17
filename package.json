@@ -1,0 +1,23 @@
+{
+  "name": "roalux-estimator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"node server.js\" \"vite\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.3",
+    "concurrently": "^10.0.3",
+    "vite": "^4.4.5"
+  }
+}
