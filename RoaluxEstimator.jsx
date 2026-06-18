@@ -753,6 +753,12 @@ function RemarksEditor({ value, onChange }) {
                 <button title="Underline" onMouseDown={e => e.preventDefault()} onClick={() => execCmd('underline')} style={{ border: "none", background: "none", cursor: "pointer", textDecoration: "underline" }}>U</button>
                 
                 <div style={{ width: 1, height: 16, background: "#D1D5DB" }} />
+
+                <button title="Red Text" onMouseDown={e => e.preventDefault()} onClick={() => execCmd('foreColor', '#EF4444')} style={{ border: "none", background: "none", cursor: "pointer", color: "#EF4444", fontWeight: 800 }}>A</button>
+                <button title="Green Text" onMouseDown={e => e.preventDefault()} onClick={() => execCmd('foreColor', '#10B981')} style={{ border: "none", background: "none", cursor: "pointer", color: "#10B981", fontWeight: 800 }}>A</button>
+                <button title="Black Text" onMouseDown={e => e.preventDefault()} onClick={() => execCmd('foreColor', '#111827')} style={{ border: "none", background: "none", cursor: "pointer", color: "#111827", fontWeight: 800 }}>A</button>
+                
+                <div style={{ width: 1, height: 16, background: "#D1D5DB" }} />
                 
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }} title="Font Size">
                     <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 700 }}>A</span>
@@ -822,7 +828,13 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
         (b?.formula || []).map(r => ({ _id: uid(), rmId: r.rmId, qty: String(r.qty) }))
     );
 
-    const addRow = () => setRows(rs => [...rs, { _id: uid(), rmId: "", qty: "" }]);
+    const addRow = () => setRows(rs => {
+        if (rs.length >= 27) {
+            showToast("Maximum 27 ingredients allowed per estimate", "error");
+            return rs;
+        }
+        return [...rs, { _id: uid(), rmId: "", qty: "" }];
+    });
     const delRow = id => setRows(rs => rs.filter(r => r._id !== id));
     const updateRow = (id, field, val) => setRows(rs => rs.map(r => r._id === id ? { ...r, [field]: val } : r));
 
@@ -1084,7 +1096,11 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                     </tbody>
                 </table>
                 <div style={{ marginTop: 16, position: "relative", zIndex: 2 }}>
-                    <Btn variant="ghost" sm onClick={addRow}>+ Add Ingredient</Btn>
+                    {rows.length < 27 ? (
+                        <Btn variant="ghost" sm onClick={addRow}>+ Add Ingredient</Btn>
+                    ) : (
+                        <div style={{ fontSize: 12, color: "#EF4444", fontWeight: 600 }}>Maximum 27 ingredients reached.</div>
+                    )}
                 </div>
 
                 <div style={{ position: "relative", zIndex: 2 }}>
@@ -1560,6 +1576,13 @@ export default function App() {
                 border: none !important; 
                 background: transparent !important; 
                 padding: 0 !important; 
+            }
+            table th, table td {
+                padding: 4px 8px !important;
+                font-size: 11px !important;
+            }
+            table input {
+                font-size: 11px !important;
             }
         }
       `}</style>
