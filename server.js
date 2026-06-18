@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, 'dist')));
 
 // MySQL Pool configuration
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || '127.0.0.1',
   user: process.env.DB_USER || 'u133448110_estimator',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'u133448110_roalux_est',
