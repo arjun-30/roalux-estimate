@@ -1557,7 +1557,7 @@ export default function App() {
 
         @media print {
             @page { margin: 0; size: auto; }
-            body { padding: 10mm; }
+            body { padding: 5mm; }
             .no-print, button { display: none !important; }
             body, .print-main { 
                 background: white !important; 
@@ -1580,26 +1580,28 @@ export default function App() {
             .remarks-preview-box, .print-remarks-container { 
                 border: 1px solid black !important; 
                 background: white !important; 
-                padding: 12px !important; 
-                margin-top: 10px !important;
+                padding: 6px !important; 
+                margin-top: 4px !important;
+                min-height: 40px !important;
             }
-            .print-remarks-wrapper { margin-top: 10px !important; }
-            .print-header { padding-bottom: 4px !important; margin-bottom: 12px !important; border-bottom: 2px solid black !important; }
-            .print-meta-grid { gap: 16px !important; margin-bottom: 12px !important; }
+            .print-remarks-wrapper { margin-top: 4px !important; }
+            .print-header { padding-bottom: 2px !important; margin-bottom: 4px !important; border-bottom: 2px solid black !important; }
+            .print-meta-grid { gap: 8px !important; margin-bottom: 4px !important; }
             table {
                 border-collapse: collapse !important;
                 border: 1px solid black !important;
             }
             table th, table td {
-                padding: 4px 6px !important;
-                font-size: 11px !important;
-                line-height: 1.2 !important;
+                padding: 1px 4px !important;
+                font-size: 9.5px !important;
+                line-height: 1.1 !important;
                 border: 1px solid black !important;
                 color: black !important;
                 background: white !important;
+                height: 14px !important;
             }
             table input {
-                font-size: 10px !important;
+                font-size: 9.5px !important;
                 padding: 0 !important;
             }
         }
