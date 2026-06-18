@@ -867,7 +867,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Top bar */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1100, margin: "0 auto", width: "100%" }}>
+            <div className="no-print" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1100, margin: "0 auto", width: "100%" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <button className="back-btn" onClick={onBack} style={{
                         display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600,
@@ -898,7 +898,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
             </div>
 
             {/* Invoice Card */}
-            <div style={{
+            <div className="print-main" style={{
                 background: "white", padding: 40, fontFamily: "'Inter',sans-serif",
                 color: "#111827", boxShadow: "0 4px 20px rgba(0,0,0,.05)",
                 position: "relative", overflow: "hidden",
@@ -1556,15 +1556,18 @@ export default function App() {
         }
 
         @media print {
+            @page { margin: 0; size: auto; }
+            body { padding: 10mm; }
             .no-print, button { display: none !important; }
             body, .print-main { 
                 background: white !important; 
                 overflow: visible !important; 
                 height: auto !important; 
             }
-            .print-main { display: block !important; padding: 0 !important; }
+            .print-main { display: block !important; padding: 0 !important; border: none !important; }
             * { box-shadow: none !important; }
             ::-webkit-scrollbar { display: none; }
+            input::placeholder { color: transparent !important; }
             input { 
                 border: none !important; 
                 background: transparent !important; 
