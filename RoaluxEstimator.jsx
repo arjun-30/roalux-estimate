@@ -1557,19 +1557,20 @@ export default function App() {
 
         @media print {
             @page { margin: 0; size: auto; }
-            body { padding: 5mm; }
-            .no-print, button { display: none !important; }
-            body, .print-main { 
-                background: white !important; 
-                overflow: visible !important; 
-                height: auto !important; 
+            html, body { 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                height: max-content !important; 
             }
-            .print-block-wrapper { display: block !important; gap: 0 !important; }
+            .no-print, button { display: none !important; }
+            .print-block-wrapper { display: block !important; gap: 0 !important; margin: 0 !important; padding: 0 !important; }
             .print-main { 
+                background: white !important;
                 display: block !important; 
                 padding: 0 !important; 
+                margin: 0 !important;
                 border: none !important; 
-                zoom: 0.92;
+                zoom: 0.90;
                 width: 100% !important;
             }
             * { box-shadow: none !important; }
