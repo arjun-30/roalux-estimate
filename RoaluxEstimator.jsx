@@ -743,8 +743,8 @@ function RemarksEditor({ value, onChange }) {
     }, [value]);
 
     return (
-        <div style={{ marginTop: 32, border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden", background: "white" }}>
-            <div style={{ padding: "8px 12px", borderBottom: "1px solid #E5E7EB", background: "#F3F4F6", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div className="print-remarks-container" style={{ marginTop: 32, border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden", background: "white" }}>
+            <div className="no-print" style={{ padding: "8px 12px", borderBottom: "1px solid #E5E7EB", background: "#F3F4F6", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".5px" }}>Remarks</div>
                 <div style={{ width: 1, height: 16, background: "#D1D5DB" }} />
                 
@@ -914,7 +914,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                 }}>CONFIDENTIAL</div>
 
                 {/* Header */}
-                <div style={{
+                <div className="print-header" style={{
                     display: "flex", justifyContent: "space-between", alignItems: "flex-end",
                     borderBottom: "2px solid #111827", paddingBottom: 12, marginBottom: 24, position: "relative", zIndex: 2
                 }}>
@@ -932,7 +932,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                 </div>
 
                 {/* Meta grid */}
-                <div style={{ display: "flex", gap: 32, marginBottom: 32, position: "relative", zIndex: 2, flexWrap: "wrap" }}>
+                <div className="print-meta-grid" style={{ display: "flex", gap: 32, marginBottom: 32, position: "relative", zIndex: 2, flexWrap: "wrap" }}>
                     {[
                         {
                             label: "Product", el: <input value={p.name} readOnly style={{
@@ -1095,7 +1095,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         </tr>
                     </tbody>
                 </table>
-                <div style={{ marginTop: 16, position: "relative", zIndex: 2 }}>
+                <div className="no-print" style={{ marginTop: 16, position: "relative", zIndex: 2 }}>
                     {rows.length < 27 ? (
                         <Btn variant="ghost" sm onClick={addRow}>+ Add Ingredient</Btn>
                     ) : (
@@ -1105,14 +1105,14 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
 
                 <div style={{ position: "relative", zIndex: 2 }}>
                     {isEditingRemarks ? (
-                        <div style={{ marginTop: 32 }}>
+                        <div className="print-remarks-wrapper" style={{ marginTop: 32 }}>
                             <RemarksEditor value={remarks} onChange={setRemarks} />
-                            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
+                            <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
                                 <Btn sm onClick={() => setIsEditingRemarks(false)}>Done Editing</Btn>
                             </div>
                         </div>
                     ) : remarks ? (
-                        <div style={{ marginTop: 32 }}>
+                        <div className="print-remarks-wrapper" style={{ marginTop: 32 }}>
                             <div onClick={() => setIsEditingRemarks(true)} className="remarks-preview-box" style={{
                                 padding: 16, border: "1px dashed #E5E7EB", borderRadius: 8, cursor: "pointer",
                                 background: "#F9FAFB", minHeight: 60, transition: "all 0.2s"
@@ -1125,7 +1125,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                             </div>
                         </div>
                     ) : (
-                        <div style={{ marginTop: 32 }}>
+                        <div className="no-print" style={{ marginTop: 32 }}>
                             <Btn variant="ghost" sm onClick={() => setIsEditingRemarks(true)}>+ Add Remarks</Btn>
                         </div>
                     )}
@@ -1574,18 +1574,26 @@ export default function App() {
                 padding: 0 !important; 
                 margin: 0 !important; 
                 font-size: inherit !important;
+                height: auto !important;
+                min-height: 0 !important;
             }
-            .remarks-preview-box { 
+            .remarks-preview-box, .print-remarks-container { 
                 border: none !important; 
                 background: transparent !important; 
                 padding: 0 !important; 
+                margin-top: 10px !important;
             }
+            .print-remarks-wrapper { margin-top: 10px !important; }
+            .print-header { padding-bottom: 4px !important; margin-bottom: 12px !important; }
+            .print-meta-grid { gap: 16px !important; margin-bottom: 12px !important; }
             table th, table td {
-                padding: 4px 8px !important;
-                font-size: 11px !important;
+                padding: 2px 4px !important;
+                font-size: 10px !important;
+                line-height: 1.1 !important;
             }
             table input {
-                font-size: 11px !important;
+                font-size: 10px !important;
+                padding: 0 !important;
             }
         }
       `}</style>
