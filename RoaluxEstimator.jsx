@@ -1578,18 +1578,25 @@ export default function App() {
                 min-height: 0 !important;
             }
             .remarks-preview-box, .print-remarks-container { 
-                border: none !important; 
-                background: transparent !important; 
-                padding: 0 !important; 
+                border: 1px solid black !important; 
+                background: white !important; 
+                padding: 12px !important; 
                 margin-top: 10px !important;
             }
             .print-remarks-wrapper { margin-top: 10px !important; }
-            .print-header { padding-bottom: 4px !important; margin-bottom: 12px !important; }
+            .print-header { padding-bottom: 4px !important; margin-bottom: 12px !important; border-bottom: 2px solid black !important; }
             .print-meta-grid { gap: 16px !important; margin-bottom: 12px !important; }
+            table {
+                border-collapse: collapse !important;
+                border: 1px solid black !important;
+            }
             table th, table td {
-                padding: 2px 4px !important;
-                font-size: 10px !important;
-                line-height: 1.1 !important;
+                padding: 4px 6px !important;
+                font-size: 11px !important;
+                line-height: 1.2 !important;
+                border: 1px solid black !important;
+                color: black !important;
+                background: white !important;
             }
             table input {
                 font-size: 10px !important;
