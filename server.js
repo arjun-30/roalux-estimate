@@ -1,7 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
 const path = require('path');
+const mysql = require('mysql2/promise');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -12,95 +13,193 @@ app.use(express.json());
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'dist')));
 
-const dbFile = path.join(__dirname, 'database.json');
+// MySQL Pool configuration
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'u133448110_estimator',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'u133448110_roalux_est',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-// Seed data
-const defaultData = {
-  suppliers: [
-    { id: "s1", name: "Sigma-Aldrich", code: "SA", country: "Germany", email: "orders@sigma.com", color: "#3B82F6" },
-    { id: "s2", name: "BASF India", code: "BI", country: "India", email: "india@basf.com", color: "#8B5CF6" },
-    { id: "s3", name: "Brenntag", code: "BR", country: "Netherlands", email: "info@brenntag.nl", color: "#10B981" },
-    { id: "s4", name: "Univar Solutions", code: "UV", country: "USA", email: "sales@univar.com", color: "#F59E0B" }
-  ],
-  rms: [
-    { id: "rm1", name: "DM Water", supplier: "s3", price: 2.50 },
-    { id: "rm2", name: "SHMP", supplier: "s1", price: 45.00 },
-    { id: "rm3", name: "PMO-ICP", supplier: "s2", price: 120.00 },
-    { id: "rm4", name: "Alphox", supplier: "s4", price: 85.00 },
-    { id: "rm5", name: "Thickner PU300", supplier: "s1", price: 350.00 }
-  ],
-  products: [
-    {
-        id: "p1", code: "PRO-001", name: "PRO40 White", cat: "Paint", batchSize: 1000,
-        desc: "Premium interior white emulsion.",
-        status: "trial",
-        batches: [
-            {
-                id: "b1", bid: "PRO-001-T01", name: "Trial 1 — Initial Mix", size: 100, type: "formula",
-                status: "testing", notes: "Check viscosity and hiding power.",
-                gloss: "", viscosity: "",
-                formula: [
-                    { rmId: "rm1", qty: 40, pct: 40 },
-                    { rmId: "rm2", qty: 0.5, pct: 0.5 },
-                    { rmId: "rm3", qty: 10, pct: 10 },
-                    { rmId: "rm4", qty: 2, pct: 2 },
-                    { rmId: "rm5", qty: 1, pct: 1 }
-                ]
-            }
-        ]
+// Seed Initial Data
+async function initDB() {
+  try {
+    const connection = await pool.getConnection();
+    
+    // Create tables
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS suppliers (
+        id VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255),
+        code VARCHAR(255),
+        country VARCHAR(255),
+        email VARCHAR(255),
+        color VARCHAR(255)
+      )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS raw_materials (
+        id VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255),
+        supplier VARCHAR(255),
+        price FLOAT
+      )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS products (
+        id VARCHAR(255) PRIMARY KEY,
+        code VARCHAR(255),
+        name VARCHAR(255),
+        cat VARCHAR(255),
+        batchSize FLOAT,
+        \`desc\` TEXT,
+        status VARCHAR(255),
+        batches JSON
+      )
+    `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS activity (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        msg TEXT,
+        color VARCHAR(255),
+        time VARCHAR(255)
+      )
+    `);
+
+    // Seed suppliers
+    const [supplierRows] = await connection.query('SELECT COUNT(*) as count FROM suppliers');
+    if (supplierRows[0].count === 0) {
+      const suppliers = [
+        ["s1", "Sigma-Aldrich", "SA", "Germany", "orders@sigma.com", "#3B82F6"],
+        ["s2", "BASF India", "BI", "India", "india@basf.com", "#8B5CF6"],
+        ["s3", "Brenntag", "BR", "Netherlands", "info@brenntag.nl", "#10B981"],
+        ["s4", "Univar Solutions", "UV", "USA", "sales@univar.com", "#F59E0B"]
+      ];
+      await connection.query('INSERT INTO suppliers (id, name, code, country, email, color) VALUES ?', [suppliers]);
+      
+      const rms = [
+        ["rm1", "DM Water", "s3", 2.50],
+        ["rm2", "SHMP", "s1", 45.00],
+        ["rm3", "PMO-ICP", "s2", 120.00],
+        ["rm4", "Alphox", "s4", 85.00],
+        ["rm5", "Thickner PU300", "s1", 350.00]
+      ];
+      await connection.query('INSERT INTO raw_materials (id, name, supplier, price) VALUES ?', [rms]);
+
+      const batches = JSON.stringify([
+        {
+          id: "b1", bid: "PRO-001-T01", name: "Trial 1 — Initial Mix", size: 100, type: "formula",
+          status: "testing", notes: "Check viscosity and hiding power.",
+          gloss: "", viscosity: "",
+          formula: [
+            { rmId: "rm1", qty: 40, pct: 40 },
+            { rmId: "rm2", qty: 0.5, pct: 0.5 },
+            { rmId: "rm3", qty: 10, pct: 10 },
+            { rmId: "rm4", qty: 2, pct: 2 },
+            { rmId: "rm5", qty: 1, pct: 1 }
+          ]
+        }
+      ]);
+      const products = [
+        ["p1", "PRO-001", "PRO40 White", "Paint", 1000, "Premium interior white emulsion.", "trial", batches]
+      ];
+      await connection.query('INSERT INTO products (id, code, name, cat, batchSize, `desc`, status, batches) VALUES ?', [products]);
+
+      const activity = [
+        ["Created initial batch PRO-001-T01 for PRO40 White", "#3B82F6", "Just now"]
+      ];
+      await connection.query('INSERT INTO activity (msg, color, time) VALUES ?', [activity]);
     }
-  ],
-  activity: [
-    { id: 1, msg: "Created initial batch PRO-001-T01 for PRO40 White", color: "#3B82F6", time: "Just now" }
-  ]
-};
-
-// Initialize DB file if it doesn't exist
-if (!fs.existsSync(dbFile)) {
-  fs.writeFileSync(dbFile, JSON.stringify(defaultData, null, 2));
+    
+    connection.release();
+    console.log('Database initialized successfully.');
+  } catch (err) {
+    console.error('Failed to initialize database:', err);
+  }
 }
 
-// Helper to read DB
-const readDB = () => {
-  try {
-    const data = fs.readFileSync(dbFile, 'utf8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error("Error reading database:", err);
-    return defaultData;
-  }
-};
+initDB();
 
-// Helper to write DB
-const writeDB = (data) => {
+// API Routes
+app.get('/api/data', async (req, res) => {
   try {
-    fs.writeFileSync(dbFile, JSON.stringify(data, null, 2));
-  } catch (err) {
-    console.error("Error writing database:", err);
-  }
-};
+    const [suppliers] = await pool.query('SELECT * FROM suppliers');
+    const [rms] = await pool.query('SELECT * FROM raw_materials');
+    const [productsRaw] = await pool.query('SELECT * FROM products');
+    const [activity] = await pool.query('SELECT * FROM activity ORDER BY id DESC');
 
-// Routes
-app.get('/api/data', (req, res) => {
-  const dbData = readDB();
-  res.json(dbData);
+    const products = productsRaw.map(p => ({
+      ...p,
+      batches: typeof p.batches === 'string' ? JSON.parse(p.batches) : p.batches
+    }));
+
+    res.json({ suppliers, rms, products, activity });
+  } catch (err) {
+    console.error("Fetch Data Error:", err);
+    res.status(500).json({ error: 'Failed to fetch data' });
+  }
 });
 
-// Sync whole state to DB
-app.post('/api/save', (req, res) => {
+app.post('/api/save', async (req, res) => {
   const { products, rms, activity } = req.body;
-  const dbData = readDB();
-  
-  if (products) dbData.products = products;
-  if (rms) dbData.rms = rms;
-  if (activity) dbData.activity = activity;
-  
-  writeDB(dbData);
-  res.json({ success: true });
+  try {
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    if (products && products.length > 0) {
+      for (const p of products) {
+        const batchesJson = JSON.stringify(p.batches);
+        await connection.query(`
+          INSERT INTO products (id, code, name, cat, batchSize, \`desc\`, status, batches) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE 
+          code=VALUES(code), name=VALUES(name), cat=VALUES(cat), batchSize=VALUES(batchSize), 
+          \`desc\`=VALUES(\`desc\`), status=VALUES(status), batches=VALUES(batches)
+        `, [p.id, p.code, p.name, p.cat, p.batchSize, p.desc, p.status, batchesJson]);
+      }
+    }
+
+    if (rms && rms.length > 0) {
+      for (const r of rms) {
+        await connection.query(`
+          INSERT INTO raw_materials (id, name, supplier, price) 
+          VALUES (?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE 
+          name=VALUES(name), supplier=VALUES(supplier), price=VALUES(price)
+        `, [r.id, r.name, r.supplier, r.price]);
+      }
+      
+      const rmIds = rms.map(r => r.id);
+      if (rmIds.length > 0) {
+        await connection.query('DELETE FROM raw_materials WHERE id NOT IN (?)', [rmIds]);
+      }
+    } else if (rms && rms.length === 0) {
+      await connection.query('DELETE FROM raw_materials');
+    }
+
+    if (activity && activity.length > 0) {
+      await connection.query('DELETE FROM activity');
+      // Fix: Activity msg could be anything, so we use multiple inserts or batch insert
+      const actValues = activity.map(a => [a.msg, a.color, a.time]);
+      await connection.query('INSERT INTO activity (msg, color, time) VALUES ?', [actValues]);
+    }
+
+    await connection.commit();
+    connection.release();
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Save Data Error:", err);
+    res.status(500).json({ error: 'Failed to save data' });
+  }
 });
 
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
+// The "catchall" handler
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
