@@ -1204,7 +1204,7 @@ export default function App() {
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        fetch("http://localhost:3001/api/data")
+        fetch("/api/data")
             .then(res => res.json())
             .then(data => {
                 setSuppliers(data.suppliers);
@@ -1227,7 +1227,7 @@ export default function App() {
     useEffect(() => {
         if (!loaded) return;
         const timer = setTimeout(() => {
-            fetch("http://localhost:3001/api/save", {
+            fetch("/api/save", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ products, rms, activity })
