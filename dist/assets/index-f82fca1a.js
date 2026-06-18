@@ -149,35 +149,35 @@ Error generating stack: `+i.message+`
             .remarks-preview-box, .print-remarks-container { 
                 border: 1px solid black !important; 
                 background: white !important; 
-                padding: 6px !important; 
-                margin-top: 4px !important;
+                padding: 12px !important; 
+                margin-top: 24px !important;
                 min-height: 40px !important;
             }
-            .print-remarks-wrapper { margin-top: 4px !important; }
-            .print-header { padding-bottom: 2px !important; margin-bottom: 4px !important; border-bottom: 2px solid black !important; }
-            .print-meta-grid { gap: 8px !important; margin-bottom: 4px !important; }
+            .print-remarks-wrapper { margin-top: 24px !important; }
+            .print-header { padding-bottom: 2px !important; margin-bottom: 8px !important; border-bottom: 2px solid black !important; }
+            .print-meta-grid { gap: 8px !important; margin-bottom: 8px !important; }
             table {
                 border-collapse: collapse !important;
                 border: 1px solid black !important;
             }
             table th, table td {
-                padding: 1px 4px !important;
-                font-size: 9.5px !important;
+                padding: 3px 6px !important;
+                font-size: 10px !important;
                 line-height: 1.1 !important;
                 border: 1px solid black !important;
                 color: black !important;
                 background: white !important;
-                height: 14px !important;
+                height: 18px !important;
             }
             table input {
-                font-size: 9.5px !important;
+                font-size: 10px !important;
                 padding: 0 !important;
             }
             .print-supplier {
-                font-size: 8.5px !important;
+                font-size: 9px !important;
                 line-height: 1 !important;
                 min-height: 10px !important;
-                margin-top: -2px !important;
+                margin-top: 0px !important;
                 color: #555 !important;
             }
         }
