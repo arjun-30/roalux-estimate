@@ -865,7 +865,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
     if (!p || !b) return <EmptyState icon="◈" title="Batch not found" />;
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div className="print-block-wrapper" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Top bar */}
             <div className="no-print" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1100, margin: "0 auto", width: "100%" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -1564,12 +1564,12 @@ export default function App() {
                 overflow: visible !important; 
                 height: auto !important; 
             }
+            .print-block-wrapper { display: block !important; gap: 0 !important; }
             .print-main { 
                 display: block !important; 
                 padding: 0 !important; 
                 border: none !important; 
-                transform: scale(0.92);
-                transform-origin: top center;
+                zoom: 0.92;
                 width: 100% !important;
             }
             * { box-shadow: none !important; }
@@ -1590,14 +1590,22 @@ export default function App() {
                 padding: 10px !important; 
                 margin-top: 16px !important;
                 min-height: 40px !important;
+                break-inside: avoid;
                 page-break-inside: avoid;
             }
-            .print-remarks-wrapper { margin-top: 16px !important; }
+            .print-remarks-wrapper { margin-top: 0 !important; }
             .print-header { padding-bottom: 2px !important; margin-bottom: 8px !important; border-bottom: 2px solid black !important; }
             .print-meta-grid { gap: 8px !important; margin-bottom: 8px !important; }
             table {
                 border-collapse: collapse !important;
                 border: 1px solid black !important;
+                width: 100% !important;
+            }
+            table th {
+                background: #F3F4F6 !important;
+                border-bottom: 2px solid black !important;
+                font-weight: 800 !important;
+                padding: 4px 6px !important;
             }
             table th, table td {
                 padding: 2px 4px !important;
@@ -1605,7 +1613,6 @@ export default function App() {
                 line-height: 1.1 !important;
                 border: 1px solid black !important;
                 color: black !important;
-                background: white !important;
                 height: 14px !important;
             }
             table input {
