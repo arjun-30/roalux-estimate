@@ -1052,7 +1052,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                                 </div>
                                             )}
                                         </div>
-                                        {sup && <div style={{ fontSize: 11, color: "#9CA3AF", paddingLeft: 4, fontWeight: 500, marginTop: 4 }}>{sup.name}</div>}
+                                        <div className="print-supplier" style={{ fontSize: 11, color: "#9CA3AF", paddingLeft: 4, fontWeight: 500, marginTop: 0, minHeight: 13 }}>{sup ? sup.name : "\u00A0"}</div>
                                     </td>
                                     <td style={{ padding: "12px 16px", borderBottom: "1px solid #F3F4F6", textAlign: "right" }}>
                                         <input
@@ -1603,6 +1603,13 @@ export default function App() {
             table input {
                 font-size: 9.5px !important;
                 padding: 0 !important;
+            }
+            .print-supplier {
+                font-size: 8.5px !important;
+                line-height: 1 !important;
+                min-height: 10px !important;
+                margin-top: -2px !important;
+                color: #555 !important;
             }
         }
       `}</style>
