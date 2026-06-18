@@ -1564,7 +1564,14 @@ export default function App() {
                 overflow: visible !important; 
                 height: auto !important; 
             }
-            .print-main { display: block !important; padding: 0 !important; border: none !important; }
+            .print-main { 
+                display: block !important; 
+                padding: 0 !important; 
+                border: none !important; 
+                transform: scale(0.92);
+                transform-origin: top center;
+                width: 100% !important;
+            }
             * { box-shadow: none !important; }
             ::-webkit-scrollbar { display: none; }
             input::placeholder { color: transparent !important; }
@@ -1581,11 +1588,11 @@ export default function App() {
                 border: 1px solid black !important; 
                 background: white !important; 
                 padding: 10px !important; 
-                margin-top: 12px !important;
+                margin-top: 16px !important;
                 min-height: 40px !important;
                 page-break-inside: avoid;
             }
-            .print-remarks-wrapper { margin-top: 12px !important; }
+            .print-remarks-wrapper { margin-top: 16px !important; }
             .print-header { padding-bottom: 2px !important; margin-bottom: 8px !important; border-bottom: 2px solid black !important; }
             .print-meta-grid { gap: 8px !important; margin-bottom: 8px !important; }
             table {
@@ -1594,12 +1601,12 @@ export default function App() {
             }
             table th, table td {
                 padding: 2px 4px !important;
-                font-size: 10px !important;
+                font-size: 9.5px !important;
                 line-height: 1.1 !important;
                 border: 1px solid black !important;
                 color: black !important;
                 background: white !important;
-                height: 16px !important;
+                height: 14px !important;
             }
             table input {
                 font-size: 10px !important;
