@@ -149,11 +149,12 @@ Error generating stack: `+i.message+`
             .remarks-preview-box, .print-remarks-container { 
                 border: 1px solid black !important; 
                 background: white !important; 
-                padding: 12px !important; 
-                margin-top: 24px !important;
+                padding: 10px !important; 
+                margin-top: 12px !important;
                 min-height: 40px !important;
+                page-break-inside: avoid;
             }
-            .print-remarks-wrapper { margin-top: 24px !important; }
+            .print-remarks-wrapper { margin-top: 12px !important; }
             .print-header { padding-bottom: 2px !important; margin-bottom: 8px !important; border-bottom: 2px solid black !important; }
             .print-meta-grid { gap: 8px !important; margin-bottom: 8px !important; }
             table {
@@ -161,13 +162,13 @@ Error generating stack: `+i.message+`
                 border: 1px solid black !important;
             }
             table th, table td {
-                padding: 3px 6px !important;
+                padding: 2px 4px !important;
                 font-size: 10px !important;
                 line-height: 1.1 !important;
                 border: 1px solid black !important;
                 color: black !important;
                 background: white !important;
-                height: 18px !important;
+                height: 16px !important;
             }
             table input {
                 font-size: 10px !important;
