@@ -988,7 +988,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         <tr>
                             <th style={{ width: 40, textAlign: "center", fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".5px", padding: "12px 16px", borderBottom: "1px solid #E5E7EB", background: "#F3F4F6" }}>#</th>
                             {["Ingredient", "Weight (kg)", "Rate/Kg", "Cost", ""].map((h, i) => (
-                                <th key={h} style={{
+                                <th key={h} className={i === 4 ? "no-print" : ""} style={{
                                     textAlign: i >= 1 && i <= 3 ? "right" : "left",
                                     fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase",
                                     letterSpacing: ".5px", padding: "12px 16px",
@@ -1075,7 +1075,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                     }}>
                                         {r.cost > 0 ? fmtINR(r.cost) : "0.00"}
                                     </td>
-                                    <td style={{ padding: "12px 16px", borderBottom: "1px solid #F3F4F6", textAlign: "right" }}>
+                                    <td className="no-print" style={{ padding: "12px 16px", borderBottom: "1px solid #F3F4F6", textAlign: "right" }}>
                                         <button className="del-btn" onClick={() => delRow(r._id)} style={{
                                             width: 28, height: 28, borderRadius: 6, border: "1px solid transparent",
                                             background: "transparent", color: "#9CA3AF", display: "inline-flex",
@@ -1085,12 +1085,12 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                 </tr>
                             );
                         })}
-                        <tr style={{ background: "#F9FAFB", borderTop: "2px solid #E5E7EB" }}>
+                        <tr className="print-total-row" style={{ background: "#F9FAFB", borderTop: "2px solid #E5E7EB" }}>
                             <td colSpan={2} style={{ padding: "16px 16px", textAlign: "right", fontWeight: 700, fontSize: 11, color: "#6B7280", textTransform: "uppercase", letterSpacing: 1 }}>Total</td>
                             <td style={{ padding: "16px 12px", textAlign: "right", fontWeight: 800, fontSize: 16, fontFamily: "ui-monospace, Consolas, monospace" }}>{totalQty.toFixed(2)}</td>
                             <td></td>
                             <td style={{ padding: "16px 16px", textAlign: "right", fontWeight: 800, fontSize: 16, fontFamily: "ui-monospace, Consolas, monospace" }}>{fmtINR(totalCost)}</td>
-                            <td></td>
+                            <td className="no-print"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -1744,21 +1744,31 @@ export default function App() {
                 width: 100% !important;
             }
             table th {
-                background: #F3F4F6 !important;
+                background: #E5E7EB !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
                 border-bottom: 2px solid black !important;
                 font-weight: 800 !important;
-                padding: 6px 8px !important;
-                font-size: 10px !important;
+                padding: 8px 10px !important;
+                font-size: 11px !important;
             }
             table th, table td {
-                padding: 4px 8px !important;
-                font-size: 10px !important;
-                line-height: 1.2 !important;
+                padding: 6px 10px !important;
+                font-size: 11px !important;
+                line-height: 1.3 !important;
                 border: 1px solid black !important;
                 color: black !important;
             }
+            .print-total-row td {
+                background: #E5E7EB !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                font-weight: 800 !important;
+                font-size: 12px !important;
+                border-top: 2px solid black !important;
+            }
             table input {
-                font-size: 10px !important;
+                font-size: 11px !important;
                 padding: 0 !important;
             }
             .print-supplier {
