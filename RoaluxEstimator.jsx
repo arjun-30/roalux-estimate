@@ -1572,7 +1572,7 @@ export default function App() {
                         <div style={{ fontSize: 11, color: T.muted, fontFamily: "ui-monospace, Consolas, monospace", marginTop: 1 }}>
                             {view === "dashboard" ? "Overview & Activity"
                                 : view === "rawmaterials" ? ""
-                                    : view === "products" ? "Select a product to generate an invoice"
+                                    : view === "products" ? ""
                                         : view === "product-detail" ? "Formula Trials & Batches"
                                             : view === "batch-detail" ? "Editable Price Estimate"
                                                 : ""}
