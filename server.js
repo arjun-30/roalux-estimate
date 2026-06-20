@@ -243,10 +243,16 @@ app.get('/api/data', async (req, res) => {
     const [productsRaw] = await pool.query('SELECT * FROM products');
     const [activity] = await pool.query('SELECT * FROM activity ORDER BY id DESC');
 
-    const products = productsRaw.map(p => ({
-      ...p,
-      batches: typeof p.batches === 'string' ? JSON.parse(p.batches) : p.batches
-    }));
+    const products = productsRaw.map(p => {
+      let parsed = [];
+      try {
+        parsed = typeof p.batches === 'string' ? JSON.parse(p.batches) : p.batches;
+      } catch (e) {}
+      return {
+        ...p,
+        batches: Array.isArray(parsed) ? parsed : []
+      };
+    });
 
     res.json({ suppliers, rms, products, activity });
   } catch (err) {
