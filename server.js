@@ -126,6 +126,76 @@ async function initDB() {
 
 initDB();
 
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'roalux-secure-key-998877';
+let currentOTP = null;
+let otpExpires = 0;
+
+// Auth Middleware
+const authMiddleware = (req, res, next) => {
+  if (req.path === '/request-otp' || req.path === '/verify-otp') return next();
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    jwt.verify(token, JWT_SECRET);
+    next();
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+app.use('/api', authMiddleware);
+
+app.post('/api/request-otp', async (req, res) => {
+  try {
+    currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPass = process.env.ADMIN_EMAIL_APP_PASSWORD;
+
+    if (!adminEmail || !adminPass) {
+      console.warn("⚠️ SMTP Credentials missing! OTP is:", currentOTP);
+      return res.json({ success: true, message: "Email not configured. Check server logs for OTP." });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: adminEmail, pass: adminPass }
+    });
+
+    await transporter.sendMail({
+      from: `"Roalux Estimator" <${adminEmail}>`,
+      to: adminEmail,
+      subject: "Admin Login OTP",
+      html: `<h2>Roalux Security Alert</h2>
+             <p>Someone is trying to access the Roalux Estimator application.</p>
+             <p>Your one-time password is: <b style="font-size:24px; color:#3B82F6;">${currentOTP}</b></p>
+             <p>This code expires in 5 minutes.</p>`
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("OTP send error:", err);
+    res.status(500).json({ error: "Failed to send OTP email" });
+  }
+});
+
+app.post('/api/verify-otp', (req, res) => {
+  const { otp } = req.body;
+  if (!currentOTP || Date.now() > otpExpires) {
+    return res.status(400).json({ error: "OTP expired or not requested" });
+  }
+  if (otp === currentOTP) {
+    currentOTP = null; // Invalidate
+    const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '7d' });
+    return res.json({ success: true, token });
+  }
+  res.status(400).json({ error: "Invalid OTP" });
+});
+
 // API Routes
 app.get('/api/data', async (req, res) => {
   try {

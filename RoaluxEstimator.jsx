@@ -1209,10 +1209,81 @@ function AddProductModal({ open, onClose, onSave }) {
     );
 }
 
+// ─── LOGIN GATE ───────────────────────────────────────────────────────────────
+function Login({ onLogin }) {
+    const [step, setStep] = useState("request");
+    const [otp, setOtp] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const requestOtp = async () => {
+        setLoading(true); setError("");
+        try {
+            const res = await fetch("/api/request-otp", { method: "POST" });
+            const data = await res.json();
+            if (data.success) {
+                setStep("verify");
+                if (data.message) console.info(data.message);
+            } else {
+                setError(data.error || "Failed to request OTP.");
+            }
+        } catch (e) {
+            setError("Server connection failed.");
+        }
+        setLoading(false);
+    };
+
+    const verifyOtp = async () => {
+        setLoading(true); setError("");
+        try {
+            const res = await fetch("/api/verify-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ otp })
+            });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem("roalux_token", data.token);
+                onLogin(data.token);
+            } else {
+                setError(data.error || "Invalid OTP.");
+            }
+        } catch (e) {
+            setError("Server connection failed.");
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: T.bg }}>
+            <div style={{ background: "white", padding: 40, borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,.05)", maxWidth: 400, width: "100%", textAlign: "center" }}>
+                <h2 style={{ marginBottom: 8, color: T.navy }}>Admin Access</h2>
+                <p style={{ color: T.muted, fontSize: 14, marginBottom: 24 }}>
+                    {step === "request" ? "Request an OTP to access the estimator." : "Enter the 6-digit OTP sent to the admin email."}
+                </p>
+                {error && <div style={{ color: T.red, fontSize: 13, marginBottom: 16, background: "#FEF2F2", padding: 8, borderRadius: 6 }}>{error}</div>}
+                {step === "request" ? (
+                    <Btn onClick={requestOtp} disabled={loading} style={{ width: "100%", justifyContent: "center" }}>
+                        {loading ? "Sending..." : "Request Access OTP"}
+                    </Btn>
+                ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <FInput value={otp} onChange={e => setOtp(e.target.value)} placeholder="000000" style={{ textAlign: "center", fontSize: 24, letterSpacing: 4 }} />
+                        <Btn onClick={verifyOtp} disabled={loading || !otp} style={{ width: "100%", justifyContent: "center" }}>
+                            {loading ? "Verifying..." : "Verify & Login"}
+                        </Btn>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // APP ROOT
 // ═══════════════════════════════════════════════════════════════════════════
 export default function App() {
+    const [token, setToken] = useState(() => localStorage.getItem("roalux_token") || null);
     const [rms, setRms] = useState([]);
     const [products, setProducts] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
@@ -1220,8 +1291,16 @@ export default function App() {
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        fetch("/api/data")
-            .then(res => res.json())
+        if (!token) return;
+        fetch("/api/data", { headers: { "Authorization": `Bearer ${token}` } })
+            .then(res => {
+                if (res.status === 401) {
+                    setToken(null);
+                    localStorage.removeItem("roalux_token");
+                    throw new Error("Unauthorized");
+                }
+                return res.json();
+            })
             .then(data => {
                 setSuppliers(data.suppliers);
                 setRms(data.rms);
@@ -1230,22 +1309,20 @@ export default function App() {
                 setLoaded(true);
             })
             .catch(err => {
-                console.error("Failed to load DB data, falling back to init", err);
-                setRms(INIT_RMS);
-                setProducts(INIT_PRODUCTS);
-                setSuppliers(INIT_SUPPLIERS);
-                setActivity(INIT_ACTIVITY);
-                setLoaded(true);
+                console.error("Failed to load DB data", err);
             });
-    }, []);
+    }, [token]);
 
     // Sync to DB when state changes
     useEffect(() => {
-        if (!loaded) return;
+        if (!loaded || !token) return;
         const timer = setTimeout(() => {
             fetch("/api/save", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ products, rms, activity })
             }).catch(e => console.error("Sync error", e));
         }, 500);
@@ -1363,6 +1440,12 @@ export default function App() {
 
     const state = { rms, products, suppliers, activity };
 
+    const handleLogout = () => {
+        localStorage.removeItem("roalux_token");
+        setToken(null);
+    };
+
+    if (!token) return <Login onLogin={setToken} />;
     if (!loaded) return <div style={{ padding: 40, fontFamily: "'Inter',sans-serif" }}>Loading database...</div>;
 
     return (
@@ -1408,6 +1491,20 @@ export default function App() {
                             </div>
                         );
                     })}
+                    <div style={{ width: 1, height: 24, background: "rgba(255,255,255,.15)", margin: "0 8px" }} />
+                    <button onClick={handleLogout} className="btn-ghost" style={{
+                        color: "#EF4444", fontSize: 12, fontWeight: 600, padding: "6px 12px", 
+                        borderRadius: 6, border: "1px solid rgba(239,68,68,.3)", background: "transparent",
+                        cursor: "pointer", display: "flex", alignItems: "center", gap: 6, transition: "all .15s"
+                    }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,.1)"; e.currentTarget.style.borderColor = "rgba(239,68,68,.5)"; }}
+                       onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(239,68,68,.3)"; }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Logout
+                    </button>
                 </div>
             </div>
 
@@ -1556,11 +1653,11 @@ export default function App() {
         }
 
         @media print {
-            @page { margin: 0; size: auto; }
+            @page { margin: 12mm 15mm; size: A4; }
             html, body { 
                 margin: 0 !important; 
                 padding: 0 !important; 
-                height: max-content !important; 
+                background: white !important;
             }
             .no-print, button { display: none !important; }
             .print-block-wrapper { display: block !important; gap: 0 !important; margin: 0 !important; padding: 0 !important; }
@@ -1568,10 +1665,10 @@ export default function App() {
                 background: white !important;
                 display: block !important; 
                 padding: 0 !important; 
-                margin: 0 !important;
+                margin: 0 auto !important;
                 border: none !important; 
-                zoom: 0.90;
                 width: 100% !important;
+                max-width: 100% !important;
             }
             * { box-shadow: none !important; }
             ::-webkit-scrollbar { display: none; }
@@ -1593,6 +1690,7 @@ export default function App() {
                 min-height: 40px !important;
                 break-inside: avoid;
                 page-break-inside: avoid;
+                border-radius: 0 !important;
             }
             .print-remarks-wrapper { margin-top: 0 !important; }
             .print-header { padding-bottom: 2px !important; margin-bottom: 8px !important; border-bottom: 2px solid black !important; }
@@ -1606,15 +1704,15 @@ export default function App() {
                 background: #F3F4F6 !important;
                 border-bottom: 2px solid black !important;
                 font-weight: 800 !important;
-                padding: 4px 6px !important;
+                padding: 6px 8px !important;
+                font-size: 10px !important;
             }
             table th, table td {
-                padding: 2px 4px !important;
-                font-size: 9.5px !important;
-                line-height: 1.1 !important;
+                padding: 4px 8px !important;
+                font-size: 10px !important;
+                line-height: 1.2 !important;
                 border: 1px solid black !important;
                 color: black !important;
-                height: 14px !important;
             }
             table input {
                 font-size: 10px !important;
