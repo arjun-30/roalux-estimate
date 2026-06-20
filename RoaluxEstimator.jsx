@@ -382,7 +382,6 @@ function RawMaterials({ state, onNav, onAddRM }) {
                         color: T.muted, width: 14, height: 14, pointerEvents: "none", transition: "color 0.2s"
                     }} className="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </div>
-                <Btn onClick={onAddRM}>+ Add Material</Btn>
             </div>
 
             {/* Header row */}
@@ -1562,7 +1561,7 @@ export default function App() {
                         </div>
                         <div style={{ fontSize: 11, color: T.muted, fontFamily: "ui-monospace, Consolas, monospace", marginTop: 1 }}>
                             {view === "dashboard" ? "Overview & Activity"
-                                : view === "rawmaterials" ? "Ingredient Library"
+                                : view === "rawmaterials" ? ""
                                     : view === "products" ? "Select a product to generate an invoice"
                                         : view === "product-detail" ? "Formula Trials & Batches"
                                             : view === "batch-detail" ? "Editable Price Estimate"
