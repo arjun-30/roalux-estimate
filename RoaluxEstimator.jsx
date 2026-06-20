@@ -1255,23 +1255,58 @@ function Login({ onLogin }) {
     };
 
     return (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: T.bg }}>
-            <div style={{ background: "white", padding: 40, borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,.05)", maxWidth: 400, width: "100%", textAlign: "center" }}>
-                <h2 style={{ marginBottom: 8, color: T.navy }}>Admin Access</h2>
-                <p style={{ color: T.muted, fontSize: 14, marginBottom: 24 }}>
-                    {step === "request" ? "Request an OTP to access the estimator." : "Enter the 6-digit OTP sent to the admin email."}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: T.navy, fontFamily: "'Inter', sans-serif" }}>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                *,*::before,*::after{box-sizing:border-box;}
+                .login-btn {
+                    background: #2563EB; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+                }
+                .login-btn:hover:not(:disabled) { background: #1D4ED8; transform: translateY(-1px); }
+                .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+            `}</style>
+            
+            <div style={{ background: T.card, padding: "48px 40px", borderRadius: 16, boxShadow: "0 20px 40px rgba(0,0,0,.3)", maxWidth: 420, width: "100%", textAlign: "center", border: "1px solid rgba(255,255,255,.1)" }}>
+                
+                {/* Logo Section */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 32 }}>
+                    <div style={{ marginBottom: 12 }}>
+                        <img src="./logo.png" alt="ROALUX Logo" style={{ height: 32, width: "auto" }} />
+                    </div>
+                    <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: "2px", fontWeight: 700 }}>
+                        Paint Recipe System
+                    </div>
+                </div>
+
+                <h2 style={{ marginBottom: 8, color: T.text, fontSize: 24, fontWeight: 700 }}>Admin Access</h2>
+                <p style={{ color: T.muted, fontSize: 14, marginBottom: 32, lineHeight: 1.5 }}>
+                    {step === "request" ? "Request a One-Time Password to access the secure estimator system." : "Check your admin email. Enter the 6-digit OTP to continue."}
                 </p>
-                {error && <div style={{ color: T.red, fontSize: 13, marginBottom: 16, background: "#FEF2F2", padding: 8, borderRadius: 6 }}>{error}</div>}
+                
+                {error && <div style={{ color: T.red, fontSize: 13, marginBottom: 20, background: "#FEF2F2", padding: "10px 14px", borderRadius: 8, border: "1px solid #FECACA", fontWeight: 500 }}>{error}</div>}
+                
                 {step === "request" ? (
-                    <Btn onClick={requestOtp} disabled={loading} style={{ width: "100%", justifyContent: "center" }}>
-                        {loading ? "Sending..." : "Request Access OTP"}
-                    </Btn>
+                    <button className="login-btn" onClick={requestOtp} disabled={loading} style={{ width: "100%" }}>
+                        {loading ? "Sending OTP..." : "Request Access OTP"}
+                    </button>
                 ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                        <FInput value={otp} onChange={e => setOtp(e.target.value)} placeholder="000000" style={{ textAlign: "center", fontSize: 24, letterSpacing: 4 }} />
-                        <Btn onClick={verifyOtp} disabled={loading || !otp} style={{ width: "100%", justifyContent: "center" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                        <div>
+                            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".9px", color: T.muted, marginBottom: 6, textAlign: "left" }}>One-Time Password</div>
+                            <input 
+                                value={otp} 
+                                onChange={e => setOtp(e.target.value)} 
+                                placeholder="000000" 
+                                style={{ 
+                                    textAlign: "center", fontSize: 28, letterSpacing: 8, padding: "12px 0", 
+                                    fontWeight: 700, color: T.text, background: T.bg, border: "1px solid #E5E7EB", 
+                                    borderRadius: 8, width: "100%", outline: "none", fontFamily: "monospace" 
+                                }} 
+                            />
+                        </div>
+                        <button className="login-btn" onClick={verifyOtp} disabled={loading || !otp} style={{ width: "100%" }}>
                             {loading ? "Verifying..." : "Verify & Login"}
-                        </Btn>
+                        </button>
                     </div>
                 )}
             </div>
