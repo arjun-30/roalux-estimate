@@ -359,9 +359,9 @@ function EmptyState({ icon, title, hint }) {
 // ─── RAW MATERIALS ────────────────────────────────────────────────────────────
 function RawMaterials({ state, onNav, onAddRM }) {
     const [q, setQ] = useState("");
-    const filtered = state.rms.filter(rm =>
-        !q || rm.name.toLowerCase().includes(q.toLowerCase())
-    );
+    const filtered = state.rms
+        .filter(rm => !q || rm.name.toLowerCase().includes(q.toLowerCase()))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
