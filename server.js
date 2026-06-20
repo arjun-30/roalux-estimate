@@ -128,10 +128,24 @@ initDB();
 
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'roalux-secure-key-998877';
+const JWT_SECRET = process.env.JWT_SECRET || require('crypto').randomBytes(32).toString('hex');
 let currentOTP = null;
 let otpExpires = 0;
+let otpAttempts = 0;
+
+const otpRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 5, // 5 requests per IP
+  message: { error: 'Too many OTP requests from this IP, please try again after 15 minutes.' }
+});
+
+const otpVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many verification attempts from this IP, please try again later.' }
+});
 
 // Auth Middleware
 const authMiddleware = (req, res, next) => {
@@ -148,10 +162,11 @@ const authMiddleware = (req, res, next) => {
 
 app.use('/api', authMiddleware);
 
-app.post('/api/request-otp', async (req, res) => {
+app.post('/api/request-otp', otpRequestLimiter, async (req, res) => {
   try {
     currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
     otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+    otpAttempts = 0;
 
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPass = process.env.ADMIN_EMAIL_APP_PASSWORD;
@@ -183,16 +198,25 @@ app.post('/api/request-otp', async (req, res) => {
   }
 });
 
-app.post('/api/verify-otp', (req, res) => {
+app.post('/api/verify-otp', otpVerifyLimiter, (req, res) => {
   const { otp } = req.body;
   if (!currentOTP || Date.now() > otpExpires) {
     return res.status(400).json({ error: "OTP expired or not requested" });
   }
+  
   if (otp === currentOTP) {
     currentOTP = null; // Invalidate
-    const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '7d' });
+    otpAttempts = 0;
+    const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '12h' }); // Shorter session expiry
     return res.json({ success: true, token });
   }
+  
+  otpAttempts++;
+  if (otpAttempts >= 5) {
+    currentOTP = null;
+    return res.status(400).json({ error: "Too many failed attempts. OTP invalidated." });
+  }
+  
   res.status(400).json({ error: "Invalid OTP" });
 });
 
