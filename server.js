@@ -150,8 +150,17 @@ const otpVerifyLimiter = rateLimit({
 // Auth Middleware
 const authMiddleware = (req, res, next) => {
   if (req.path === '/request-otp' || req.path === '/verify-otp') return next();
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  
+  const authHeader = req.headers.authorization;
+  if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid token format' });
+  }
+  
+  const token = authHeader.split(' ')[1];
+  if (!token || token.length > 500) {
+    return res.status(401).json({ error: 'Unauthorized: Token exceeds length limits' });
+  }
+
   try {
     jwt.verify(token, JWT_SECRET);
     next();
@@ -200,6 +209,12 @@ app.post('/api/request-otp', otpRequestLimiter, async (req, res) => {
 
 app.post('/api/verify-otp', otpVerifyLimiter, (req, res) => {
   const { otp } = req.body;
+  
+  // Strict Validation: Ensure OTP is exactly a 6-digit string
+  if (!otp || typeof otp !== 'string' || !/^\d{6}$/.test(otp)) {
+    return res.status(400).json({ error: "Invalid OTP format. Must be a 6-digit number." });
+  }
+
   if (!currentOTP || Date.now() > otpExpires) {
     return res.status(400).json({ error: "OTP expired or not requested" });
   }
@@ -240,36 +255,50 @@ app.get('/api/data', async (req, res) => {
   }
 });
 
+// Input sanitization helper
+const sanitizeStr = (val) => (typeof val === 'string' ? val.trim() : '');
+
 app.post('/api/save', async (req, res) => {
   const { products, rms, activity } = req.body;
+  
+  // Strict Type Enforcement
+  if (products !== undefined && !Array.isArray(products)) return res.status(400).json({ error: "Invalid payload: products must be an array" });
+  if (rms !== undefined && !Array.isArray(rms)) return res.status(400).json({ error: "Invalid payload: rms must be an array" });
+  if (activity !== undefined && !Array.isArray(activity)) return res.status(400).json({ error: "Invalid payload: activity must be an array" });
+
   try {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
     if (products && products.length > 0) {
       for (const p of products) {
-        const batchesJson = JSON.stringify(p.batches);
+        if (!p.id || typeof p.id !== 'string') continue;
+        const batchesJson = JSON.stringify(p.batches || []);
         await connection.query(`
           INSERT INTO products (id, code, name, cat, batchSize, \`desc\`, status, batches) 
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           ON DUPLICATE KEY UPDATE 
           code=VALUES(code), name=VALUES(name), cat=VALUES(cat), batchSize=VALUES(batchSize), 
           \`desc\`=VALUES(\`desc\`), status=VALUES(status), batches=VALUES(batches)
-        `, [p.id, p.code, p.name, p.cat, p.batchSize, p.desc, p.status, batchesJson]);
+        `, [
+          sanitizeStr(p.id), sanitizeStr(p.code), sanitizeStr(p.name), sanitizeStr(p.cat), 
+          Number(p.batchSize) || 0, sanitizeStr(p.desc), sanitizeStr(p.status), batchesJson
+        ]);
       }
     }
 
     if (rms && rms.length > 0) {
       for (const r of rms) {
+        if (!r.id || typeof r.id !== 'string') continue;
         await connection.query(`
           INSERT INTO raw_materials (id, name, supplier, price) 
           VALUES (?, ?, ?, ?)
           ON DUPLICATE KEY UPDATE 
           name=VALUES(name), supplier=VALUES(supplier), price=VALUES(price)
-        `, [r.id, r.name, r.supplier, r.price]);
+        `, [sanitizeStr(r.id), sanitizeStr(r.name), sanitizeStr(r.supplier), Number(r.price) || 0]);
       }
       
-      const rmIds = rms.map(r => r.id);
+      const rmIds = rms.map(r => String(r.id));
       if (rmIds.length > 0) {
         await connection.query('DELETE FROM raw_materials WHERE id NOT IN (?)', [rmIds]);
       }
@@ -279,9 +308,13 @@ app.post('/api/save', async (req, res) => {
 
     if (activity && activity.length > 0) {
       await connection.query('DELETE FROM activity');
-      // Fix: Activity msg could be anything, so we use multiple inserts or batch insert
-      const actValues = activity.map(a => [a.msg, a.color, a.time]);
-      await connection.query('INSERT INTO activity (msg, color, time) VALUES ?', [actValues]);
+      const actValues = activity
+        .filter(a => a.msg && typeof a.msg === 'string')
+        .map(a => [sanitizeStr(a.msg), sanitizeStr(a.color), sanitizeStr(a.time)]);
+        
+      if (actValues.length > 0) {
+        await connection.query('INSERT INTO activity (msg, color, time) VALUES ?', [actValues]);
+      }
     }
 
     await connection.commit();
