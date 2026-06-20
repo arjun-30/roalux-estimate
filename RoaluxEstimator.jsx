@@ -821,6 +821,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
     const [required, setRequired] = useState(String(b?.size || 100));
     const [gloss, setGloss] = useState(b?.gloss || "");
     const [viscosity, setViscosity] = useState(b?.viscosity || "");
+    const [wpl, setWpl] = useState(b?.wpl || "");
     const [remarks, setRemarks] = useState(b?.remarks || "");
     const [isEditingRemarks, setIsEditingRemarks] = useState(false);
     const [rows, setRows] = useState(() =>
@@ -855,7 +856,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
         const formula = rowsCalc
             .filter(r => r.rmId && parseFloat(r.qty) > 0)
             .map(r => ({ rmId: r.rmId, qty: parseFloat(r.qty), pct: (parseFloat(r.qty) / req) * 100 }));
-        onSave(pid, bid, { name: batchName, size: req, gloss, viscosity, formula, remarks });
+        onSave(pid, bid, { name: batchName, size: req, gloss, viscosity, wpl, formula, remarks });
         showToast("Batch saved", "success");
     };
 
@@ -970,6 +971,14 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                     border: "1px solid #E5E7EB", fontFamily: "inherit", fontSize: 15, fontWeight: 700,
                                     padding: "4px 8px", margin: "-4px -8px", borderRadius: 4, background: "transparent", color: "#111827",
                                     outline: "none", width: 120
+                                }} />
+                        },
+                        {
+                            label: "WPL", el: <input value={wpl} onChange={e => setWpl(e.target.value)}
+                                style={{
+                                    border: "1px solid #E5E7EB", fontFamily: "inherit", fontSize: 15, fontWeight: 700,
+                                    padding: "4px 8px", margin: "-4px -8px", borderRadius: 4, background: "transparent", color: "#111827",
+                                    outline: "none", width: 80
                                 }} />
                         },
                     ].map(({ label, el }) => (
