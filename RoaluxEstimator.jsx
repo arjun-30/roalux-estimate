@@ -1483,7 +1483,7 @@ export default function App() {
     if (!loaded) return <div style={{ padding: 40, fontFamily: "'Inter',sans-serif" }}>Loading database...</div>;
 
     return (
-        <div style={{
+        <div className="app-root" style={{
             fontFamily: "'Inter',sans-serif", background: T.bg, color: T.text,
             height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden"
         }}>
@@ -1692,6 +1692,13 @@ export default function App() {
                 margin: 0 !important; 
                 padding: 0 !important; 
                 background: white !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+            .app-root {
+                height: auto !important;
+                overflow: visible !important;
+                display: block !important;
             }
             .no-print, button { display: none !important; }
             .print-block-wrapper { display: block !important; gap: 0 !important; margin: 0 !important; padding: 0 !important; }
@@ -1703,6 +1710,8 @@ export default function App() {
                 border: none !important; 
                 width: 100% !important;
                 max-width: 100% !important;
+                overflow: visible !important;
+                height: auto !important;
             }
             * { box-shadow: none !important; }
             ::-webkit-scrollbar { display: none; }
