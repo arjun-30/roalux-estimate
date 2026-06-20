@@ -1736,8 +1736,8 @@ export default function App() {
                 border-radius: 0 !important;
             }
             .print-remarks-wrapper { margin-top: 0 !important; }
-            .print-header { padding-bottom: 2px !important; margin-bottom: 8px !important; border-bottom: 2px solid black !important; }
-            .print-meta-grid { gap: 8px !important; margin-bottom: 8px !important; }
+            .print-header { padding-bottom: 4px !important; margin-bottom: 16px !important; border-bottom: 2px solid black !important; }
+            .print-meta-grid { gap: 32px !important; margin-bottom: 16px !important; }
             table {
                 border-collapse: collapse !important;
                 border: 1px solid black !important;
@@ -1749,13 +1749,13 @@ export default function App() {
                 print-color-adjust: exact !important;
                 border-bottom: 2px solid black !important;
                 font-weight: 800 !important;
-                padding: 8px 10px !important;
+                padding: 5px 8px !important;
                 font-size: 11px !important;
             }
             table th, table td {
-                padding: 6px 10px !important;
+                padding: 3px 8px !important;
                 font-size: 11px !important;
-                line-height: 1.3 !important;
+                line-height: 1.1 !important;
                 border: 1px solid black !important;
                 color: black !important;
             }
