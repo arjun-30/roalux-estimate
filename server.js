@@ -207,7 +207,7 @@ app.post('/api/verify-otp', otpVerifyLimiter, (req, res) => {
   if (otp === currentOTP) {
     currentOTP = null; // Invalidate
     otpAttempts = 0;
-    const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '12h' }); // Shorter session expiry
+    const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '30d' });
     return res.json({ success: true, token });
   }
   
