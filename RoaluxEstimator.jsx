@@ -1345,10 +1345,11 @@ export default function App() {
                 return res.json();
             })
             .then(data => {
-                setSuppliers(data.suppliers);
-                setRms(data.rms);
-                setProducts(data.products);
-                setActivity(data.activity);
+                if (data.error) throw new Error(data.error);
+                setSuppliers(data.suppliers || []);
+                setRms(data.rms || []);
+                setProducts(data.products || []);
+                setActivity(data.activity || []);
                 setLoaded(true);
             })
             .catch(err => {
