@@ -1263,7 +1263,7 @@ function Login({ onLogin }) {
     };
 
     return (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: T.navy, fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#ffffff", fontFamily: "'Inter', sans-serif" }}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
                 *,*::before,*::after{box-sizing:border-box;}
@@ -1274,7 +1274,7 @@ function Login({ onLogin }) {
                 .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
             `}</style>
             
-            <div style={{ background: T.card, padding: "48px 40px", borderRadius: 16, boxShadow: "0 20px 40px rgba(0,0,0,.3)", maxWidth: 420, width: "100%", textAlign: "center", border: "1px solid rgba(255,255,255,.1)" }}>
+            <div style={{ background: "#ffffff", padding: "48px 40px", borderRadius: 16, boxShadow: "0 10px 40px rgba(0,0,0,.05)", maxWidth: 420, width: "100%", textAlign: "center", border: "1px solid #E5E7EB" }}>
                 
                 {/* Logo Section */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 32 }}>
@@ -1304,6 +1304,7 @@ function Login({ onLogin }) {
                             <input 
                                 value={otp} 
                                 onChange={e => setOtp(e.target.value)} 
+                                onKeyDown={e => e.key === "Enter" && otp && !loading && verifyOtp()}
                                 placeholder="000000" 
                                 style={{ 
                                     textAlign: "center", fontSize: 28, letterSpacing: 8, padding: "12px 0", 
