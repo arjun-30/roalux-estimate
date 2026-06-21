@@ -386,13 +386,13 @@ function RawMaterials({ state, onNav, onAddRM }) {
 
             {/* Header row */}
             {filtered.length > 0 && (
-                <div style={{
-                    display: "flex", alignItems: "center", padding: "5px 18px 7px",
+                <div className="mobile-hide" style={{
+                    display: "flex", alignItems: "center", padding: "5px 18px 7px", gap: 8,
                     fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", color: T.muted
                 }}>
-                    <div style={{ flex: 1 }}>Material</div>
-                    <div style={{ flex: "0 0 200px" }}>Supplier</div>
-                    <div style={{ flex: "0 0 140px", textAlign: "right" }}>Price / kg</div>
+                    <div style={{ flex: "1 1 180px" }}>Material</div>
+                    <div style={{ flex: "1 1 140px" }}>Supplier</div>
+                    <div style={{ flex: "0 0 auto", textAlign: "right" }}>Price / kg</div>
                 </div>
             )}
 
@@ -406,21 +406,21 @@ function RawMaterials({ state, onNav, onAddRM }) {
                             className="clickable-row"
                             onClick={() => onNav("rm-detail", { rmId: rm.id })}
                             style={{
-                                display: "flex", alignItems: "center", background: T.card,
+                                display: "flex", alignItems: "center", background: T.card, flexWrap: "wrap", gap: 8,
                                 border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 18px",
                                 cursor: "pointer", transition: "all .15s",
                             }}
                         >
-                            <div style={{ flex: 1, fontWeight: 600, fontSize: 14, display: "flex", alignItems: "center" }}>
+                            <div style={{ flex: "1 1 180px", fontWeight: 600, fontSize: 14, display: "flex", alignItems: "center" }}>
                                 <span style={{ color: T.muted, marginRight: 12, fontSize: 13, fontFamily: "ui-monospace, Consolas, monospace" }}>{i + 1}.</span>
                                 {rm.name}
                             </div>
-                            <div style={{ flex: "0 0 200px", fontSize: 12, color: T.muted, fontWeight: 500 }}>
+                            <div style={{ flex: "1 1 140px", fontSize: 12, color: T.muted, fontWeight: 500 }}>
                                 {sup ? sup.name : rm.supplier || "No supplier"}
                             </div>
                             <div style={{
-                                flex: "0 0 140px", textAlign: "right", fontSize: 14,
-                                fontWeight: 700, color: T.amberDim, letterSpacing: "-0.3px"
+                                flex: "0 0 auto", textAlign: "right", fontSize: 14,
+                                fontWeight: 700, color: T.amberDim, letterSpacing: "-0.3px", marginLeft: "auto"
                             }}>
                                 {fmtINR(rm.price)}
                             </div>
@@ -1279,7 +1279,7 @@ function Login({ onLogin }) {
                 {/* Logo Section */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 32 }}>
                     <div style={{ marginBottom: 12 }}>
-                        <img src="./logo.png" alt="ROALUX Logo" style={{ height: 32, width: "auto" }} />
+                        <img src="./logo.png" alt="ROALUX Logo" style={{ height: 32, width: "auto", objectFit: "contain", flexShrink: 0 }} />
                     </div>
                     <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: "2px", fontWeight: 700 }}>
                         Paint Recipe System
@@ -1502,7 +1502,8 @@ export default function App() {
             {/* ─── TOP NAVBAR ─── */}
             <div className="no-print" style={{
                 background: T.navy, display: "flex", alignItems: "center", justifyContent: "space-between",
-                flexShrink: 0, height: 64, padding: "0 24px", borderBottom: "1px solid #27272A"
+                flexShrink: 0, minHeight: 64, padding: "12px 24px", borderBottom: "1px solid #27272A",
+                flexWrap: "wrap", gap: 12
             }}>
                 {/* Logo & Brand */}
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -1618,6 +1619,10 @@ export default function App() {
         ::-webkit-scrollbar-thumb{background:#C8D8E4;border-radius:3px;}
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button{opacity:1;}
+        
+        @media (max-width: 640px) {
+            .mobile-hide { display: none !important; }
+        }
         
         /* User Friendly Button Styles */
         .btn {

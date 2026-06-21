@@ -3,12 +3,32 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const mysql = require('mysql2/promise');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
+// Custom security headers (Helmet alternative)
+app.use((req, res, next) => {
+    res.setHeader('X-DNS-Prefetch-Control', 'off');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+    res.setHeader('X-Download-Options', 'noopen');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-XSS-Protection', '0');
+    next();
+});
+
+app.use(cors({ origin: process.env.FRONTEND_URL || '*', credentials: true }));
+app.use(express.json({ limit: '50kb' })); // protect against large payloads
+
+// General API Rate Limiter
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { error: 'Too many requests from this IP.' }
+});
+app.use('/api', apiLimiter);
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'dist')));
@@ -261,8 +281,17 @@ app.get('/api/data', async (req, res) => {
   }
 });
 
-// Input sanitization helper
-const sanitizeStr = (val) => (typeof val === 'string' ? val.trim() : '');
+// Input sanitization helper (Protects against XSS)
+const sanitizeStr = (val) => {
+  if (typeof val !== 'string') return '';
+  return val.trim().replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag]));
+};
 
 app.post('/api/save', async (req, res) => {
   const { products, rms, activity } = req.body;
