@@ -229,7 +229,7 @@ Error generating stack: `+o.message+`
                 color: #555 !important;
             }
         }
-      `})]}):s.jsx("div",{style:{padding:40,fontFamily:"'Inter',sans-serif"},children:"Loading database..."}):s.jsx(op,{onLogin:t})}const hc=document.createElement("style");hc.innerHTML=`
+      `})]}):s.jsx("div",{style:{height:"100vh",background:C.bg}}):s.jsx(op,{onLogin:t})}const hc=document.createElement("style");hc.innerHTML=`
   input[type="number"]::-webkit-inner-spin-button, 
   input[type="number"]::-webkit-outer-spin-button { 
     -webkit-appearance: none; 

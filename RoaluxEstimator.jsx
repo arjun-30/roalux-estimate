@@ -1536,7 +1536,7 @@ export default function App() {
     };
 
     if (!token) return <Login onLogin={setToken} />;
-    if (!loaded) return <div style={{ padding: 40, fontFamily: "'Inter',sans-serif" }}>Loading database...</div>;
+    if (!loaded) return <div style={{ height: "100vh", background: T.bg }}></div>;
 
     return (
         <div className="app-root" style={{
