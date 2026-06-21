@@ -148,7 +148,7 @@ initDB();
 
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
-const rateLimit = require('express-rate-limit');
+
 
 const JWT_SECRET = process.env.JWT_SECRET || require('crypto').randomBytes(32).toString('hex');
 let currentOTP = null;
