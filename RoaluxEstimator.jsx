@@ -1220,9 +1220,10 @@ function AddProductModal({ open, onClose, onSave }) {
 // ─── LOGIN GATE ───────────────────────────────────────────────────────────────
 function Login({ onLogin }) {
     const [step, setStep] = useState("request");
-    const [otp, setOtp] = useState("");
+    const [otpArr, setOtpArr] = useState(Array(6).fill(""));
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const inputRefs = useRef([]);
 
     const requestOtp = async () => {
         setLoading(true); setError("");
@@ -1242,12 +1243,13 @@ function Login({ onLogin }) {
     };
 
     const verifyOtp = async () => {
+        const finalOtp = otpArr.join("");
         setLoading(true); setError("");
         try {
             const res = await fetch("/api/verify-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ otp })
+                body: JSON.stringify({ otp: finalOtp })
             });
             const data = await res.json();
             if (data.success) {
@@ -1260,6 +1262,40 @@ function Login({ onLogin }) {
             setError("Server connection failed.");
         }
         setLoading(false);
+    };
+
+    const handleOtpChange = (e, index) => {
+        const val = e.target.value;
+        if (!/^[0-9]*$/.test(val)) return;
+
+        if (val.length > 1) {
+            const pasted = val.replace(/[^0-9]/g, '').slice(0, 6).split('');
+            const newArr = [...otpArr];
+            pasted.forEach((char, i) => {
+                if (index + i < 6) newArr[index + i] = char;
+            });
+            setOtpArr(newArr);
+            const nextIdx = Math.min(index + pasted.length, 5);
+            inputRefs.current[nextIdx]?.focus();
+            return;
+        }
+
+        const newArr = [...otpArr];
+        newArr[index] = val.slice(-1);
+        setOtpArr(newArr);
+
+        if (val && index < 5) {
+            inputRefs.current[index + 1]?.focus();
+        }
+    };
+
+    const handleOtpKeyDown = (e, index) => {
+        if (e.key === "Backspace" && !otpArr[index] && index > 0) {
+            inputRefs.current[index - 1]?.focus();
+        }
+        if (e.key === "Enter" && otpArr.join("").length === 6 && !loading) {
+            verifyOtp();
+        }
     };
 
     return (
@@ -1298,22 +1334,31 @@ function Login({ onLogin }) {
                         {loading ? "Sending OTP..." : "Request Access OTP"}
                     </button>
                 ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                         <div>
-                            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".9px", color: T.muted, marginBottom: 6, textAlign: "left" }}>One-Time Password</div>
-                            <input 
-                                value={otp} 
-                                onChange={e => setOtp(e.target.value)} 
-                                onKeyDown={e => e.key === "Enter" && otp && !loading && verifyOtp()}
-                                placeholder="000000" 
-                                style={{ 
-                                    textAlign: "center", fontSize: 28, letterSpacing: 8, padding: "12px 0", 
-                                    fontWeight: 700, color: T.text, background: T.bg, border: "1px solid #E5E7EB", 
-                                    borderRadius: 8, width: "100%", outline: "none", fontFamily: "monospace" 
-                                }} 
-                            />
+                            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".9px", color: T.muted, marginBottom: 10, textAlign: "left" }}>One-Time Password</div>
+                            <div style={{ display: "flex", gap: 8, justifyContent: "space-between" }}>
+                                {otpArr.map((digit, i) => (
+                                    <input
+                                        key={i}
+                                        ref={el => inputRefs.current[i] = el}
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={digit}
+                                        onChange={e => handleOtpChange(e, i)}
+                                        onKeyDown={e => handleOtpKeyDown(e, i)}
+                                        onFocus={e => e.target.select()}
+                                        style={{
+                                            width: "100%", height: 56, textAlign: "center", fontSize: 24,
+                                            fontWeight: 700, color: T.text, background: T.bg, border: "1px solid #E5E7EB",
+                                            borderRadius: 8, outline: "none", fontFamily: "monospace", transition: "all 0.2s"
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                        <button className="login-btn" onClick={verifyOtp} disabled={loading || !otp} style={{ width: "100%" }}>
+                        <button className="login-btn" onClick={verifyOtp} disabled={loading || otpArr.join("").length !== 6} style={{ width: "100%" }}>
                             {loading ? "Verifying..." : "Verify & Login"}
                         </button>
                     </div>
