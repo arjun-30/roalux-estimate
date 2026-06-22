@@ -1407,25 +1407,42 @@ export default function App() {
 
     useEffect(() => {
         if (!token) return;
-        fetch("/api/data", { headers: { "Authorization": `Bearer ${token}` } })
-            .then(res => {
+
+        const bootSequence = async () => {
+            try {
+                if (navigator.onLine && localStorage.getItem("roalux_sync_pending") === "true") {
+                    const cached = localStorage.getItem("roalux_offline_data");
+                    if (cached) {
+                        try {
+                            await fetch("/api/save", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                                body: cached
+                            });
+                            localStorage.removeItem("roalux_sync_pending");
+                            showToast("Offline changes synced to server", "success");
+                        } catch (e) {
+                            console.error("Failed to push pending changes on boot", e);
+                        }
+                    }
+                }
+
+                const res = await fetch("/api/data", { headers: { "Authorization": `Bearer ${token}` } });
                 if (res.status === 401) {
                     setToken(null);
                     localStorage.removeItem("roalux_token");
                     throw new Error("Unauthorized");
                 }
-                return res.json();
-            })
-            .then(data => {
+                const data = await res.json();
                 if (data.error) throw new Error(data.error);
+                
                 localStorage.setItem("roalux_offline_data", JSON.stringify(data));
                 setSuppliers(data.suppliers || []);
                 setRms(data.rms || []);
                 setProducts(data.products || []);
                 setActivity(data.activity || []);
                 setLoaded(true);
-            })
-            .catch(err => {
+            } catch (err) {
                 console.error("Failed to load DB data", err);
                 const cached = localStorage.getItem("roalux_offline_data");
                 if (cached) {
@@ -1439,7 +1456,10 @@ export default function App() {
                         showToast("Offline mode: Using cached data", "error");
                     } catch (e) {}
                 }
-            });
+            }
+        };
+
+        bootSequence();
     }, [token, showToast]);
 
     // Handle online sync
