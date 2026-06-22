@@ -614,7 +614,7 @@ function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicat
                         {!formulaBatches.length
                             ? <EmptyState icon="🧪" title="No batches yet" hint='Click "+ New Trial Batch" to begin' />
                             : <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                <thead><tr>{["Batch ID", "Name"].map(h => (
+                                <thead><tr>{["Batch ID", "Name", "Status"].map(h => (
                                     <th key={h} style={{
                                         textAlign: "left", fontSize: 10, textTransform: "uppercase",
                                         letterSpacing: 1, color: T.muted, fontWeight: 700, padding: "9px 13px",
@@ -622,12 +622,15 @@ function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicat
                                     }}>{h}</th>
                                 ))}</tr></thead>
                                 <tbody>
-                                    {formulaBatches.map(b => (
-                                        <tr key={b.id} className="clickable-tr" style={{ cursor: "pointer", transition: "all .15s" }} onClick={() => onOpenBatch(pid, b.id)}>
-                                            <td style={{ padding: "11px 13px", fontFamily: "ui-monospace, Consolas, monospace", fontSize: 12, borderBottom: `1px solid #F3F4F6` }}>{b.bid}</td>
+                                    {formulaBatches.map(b => {
+                                        const isFinalized = b.status === "finalized";
+                                        return (
+                                        <tr key={b.id} className="clickable-tr" style={{ cursor: "pointer", transition: "all .15s", background: isFinalized ? "#F0FDF4" : "transparent" }} onClick={() => onOpenBatch(pid, b.id)}>
+                                            <td style={{ padding: "11px 13px", fontFamily: "ui-monospace, Consolas, monospace", fontSize: 12, borderBottom: `1px solid #F3F4F6`, borderLeft: isFinalized ? "3px solid #10B981" : "3px solid transparent" }}>{b.bid}</td>
                                             <td style={{ padding: "11px 13px", fontWeight: 600, maxWidth: 200, borderBottom: `1px solid #F3F4F6` }}>{b.name}</td>
+                                            <td style={{ padding: "11px 13px", borderBottom: `1px solid #F3F4F6` }}><Pill status={b.status || "draft"} /></td>
                                         </tr>
-                                    ))}
+                                    )})}
                                 </tbody>
                             </table>
                         }
@@ -860,6 +863,16 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
         showToast("Batch saved", "success");
     };
 
+    const handleFinalize = () => {
+        if (confirm("Are you sure you want to finalize this trial?")) {
+            const formula = rowsCalc
+                .filter(r => r.rmId && parseFloat(r.qty) > 0)
+                .map(r => ({ rmId: r.rmId, qty: parseFloat(r.qty), pct: (parseFloat(r.qty) / req) * 100 }));
+            onSave(pid, bid, { name: batchName, size: req, gloss, viscosity, wpl, formula, remarks, status: "finalized" });
+            showToast("Trial finalized successfully!", "success");
+        }
+    };
+
     const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "2-digit" });
 
     if (!p || !b) return <EmptyState icon="◈" title="Batch not found" />;
@@ -886,6 +899,15 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         </svg>
                         Print Invoice
                     </button>
+                    {b.status !== "finalized" && (
+                        <button className="btn btn-primary" onClick={handleFinalize} style={{ display: "flex", alignItems: "center", fontSize: 13, padding: "8px 16px", borderRadius: 8, background: "#10B981", border: "1px solid #059669", color: "white" }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            Finalize Trial
+                        </button>
+                    )}
                     <button className="btn btn-primary" onClick={handleSave} style={{ display: "flex", alignItems: "center", fontSize: 13, padding: "8px 20px", borderRadius: 8 }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
                             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
