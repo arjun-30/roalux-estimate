@@ -1379,6 +1379,18 @@ export default function App() {
     const [activity, setActivity] = useState([]);
     const [loaded, setLoaded] = useState(false);
 
+    const [view, setView] = useState("rawmaterials");   // current view name
+    const [viewParams, setViewParams] = useState({}); // { pid, bid, rmId }
+
+    const [toast, setToast] = useState(null);
+    const [showAddRM, setShowAddRM] = useState(false);
+    const [showAddProd, setShowAddProd] = useState(false);
+
+    const showToast = useCallback((msg, type = "") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 2800);
+    }, []);
+
     useEffect(() => {
         if (!token) return;
         fetch("/api/data", { headers: { "Authorization": `Bearer ${token}` } })
@@ -1392,6 +1404,7 @@ export default function App() {
             })
             .then(data => {
                 if (data.error) throw new Error(data.error);
+                localStorage.setItem("roalux_offline_data", JSON.stringify(data));
                 setSuppliers(data.suppliers || []);
                 setRms(data.rms || []);
                 setProducts(data.products || []);
@@ -1400,36 +1413,74 @@ export default function App() {
             })
             .catch(err => {
                 console.error("Failed to load DB data", err);
+                const cached = localStorage.getItem("roalux_offline_data");
+                if (cached) {
+                    try {
+                        const data = JSON.parse(cached);
+                        setSuppliers(data.suppliers || []);
+                        setRms(data.rms || []);
+                        setProducts(data.products || []);
+                        setActivity(data.activity || []);
+                        setLoaded(true);
+                        showToast("Offline mode: Using cached data", "error");
+                    } catch (e) {}
+                }
             });
-    }, [token]);
+    }, [token, showToast]);
+
+    // Handle online sync
+    useEffect(() => {
+        const handleOnline = () => {
+            if (localStorage.getItem("roalux_sync_pending") === "true" && token) {
+                const cached = localStorage.getItem("roalux_offline_data");
+                if (cached) {
+                    fetch("/api/save", {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: cached
+                    }).then(() => {
+                        localStorage.removeItem("roalux_sync_pending");
+                        showToast("Offline changes synced to server", "success");
+                    }).catch(e => console.error("Delayed sync failed", e));
+                }
+            }
+        };
+        window.addEventListener("online", handleOnline);
+        return () => window.removeEventListener("online", handleOnline);
+    }, [token, showToast]);
 
     // Sync to DB when state changes
     useEffect(() => {
         if (!loaded || !token) return;
         const timer = setTimeout(() => {
-            fetch("/api/save", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ products, rms, activity })
-            }).catch(e => console.error("Sync error", e));
+            const payload = { products, rms, activity };
+            const existingCacheStr = localStorage.getItem("roalux_offline_data") || "{}";
+            try {
+                const existingCache = JSON.parse(existingCacheStr);
+                localStorage.setItem("roalux_offline_data", JSON.stringify({ ...existingCache, ...payload }));
+            } catch(e){}
+
+            if (navigator.onLine) {
+                fetch("/api/save", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                }).catch(e => {
+                    console.error("Sync error, saved locally", e);
+                    localStorage.setItem("roalux_sync_pending", "true");
+                });
+            } else {
+                localStorage.setItem("roalux_sync_pending", "true");
+            }
         }, 500);
         return () => clearTimeout(timer);
-    }, [products, rms, activity, loaded]);
-
-    const [view, setView] = useState("rawmaterials");   // current view name
-    const [viewParams, setViewParams] = useState({}); // { pid, bid, rmId }
-
-    const [toast, setToast] = useState(null);
-    const [showAddRM, setShowAddRM] = useState(false);
-    const [showAddProd, setShowAddProd] = useState(false);
-
-    const showToast = useCallback((msg, type = "") => {
-        setToast({ msg, type });
-        setTimeout(() => setToast(null), 2800);
-    }, []);
+    }, [products, rms, activity, loaded, token]);
 
     const logActivity = (msg, color = "#3B82F6") => {
         setActivity(a => [{ msg, color, time: "Just now" }, ...a.slice(0, 19)]);
