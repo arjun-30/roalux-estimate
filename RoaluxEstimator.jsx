@@ -1533,40 +1533,47 @@ export default function App() {
     };
 
     const addBatch = (pid) => {
-        setProducts(ps => ps.map(p => {
-            if (p.id !== pid) return p;
-            const nextN = (p.batches.length + 1).toString().padStart(2, "0");
+        const p = products.find(x => x.id === pid);
+        if (!p) return;
+        const newBid = uid();
+        const nextN = (p.batches.length + 1).toString().padStart(2, "0");
+        const bidCode = `${p.code}-T${nextN}`;
+        
+        setProducts(ps => ps.map(prod => {
+            if (prod.id !== pid) return prod;
             const b = {
-                id: uid(), bid: `${p.code}-T${nextN}`, name: `Trial ${nextN}`,
-                type: "formula", size: p.batchSize || 100, status: "draft",
+                id: newBid, bid: bidCode, name: `Trial ${nextN}`,
+                type: "formula", size: prod.batchSize || 100, status: "draft",
                 notes: "", gloss: "", viscosity: "", formula: []
             };
-            logActivity(`New batch ${b.bid} created`, T.sky);
-            return { ...p, batches: [...p.batches, b] };
+            return { ...prod, batches: [...prod.batches, b] };
         }));
-        // Open the new batch
-        setProducts(ps => {
-            const p = ps.find(x => x.id === pid);
-            const b = p.batches[p.batches.length - 1];
-            navTo("batch-detail", { pid, bid: b.id });
-            return ps;
-        });
+        
+        logActivity(`New batch ${bidCode} created`, "#0EA5E9");
+        navTo("batch-detail", { pid, bid: newBid });
     };
 
     const duplicateBatch = (pid) => {
-        setProducts(ps => ps.map(p => {
-            if (p.id !== pid || !p.batches.length) return p;
-            const last = p.batches[p.batches.length - 1];
-            const nextN = (p.batches.length + 1).toString().padStart(2, "0");
+        const p = products.find(x => x.id === pid);
+        if (!p || !p.batches.length) return;
+        
+        const newBid = uid();
+        const nextN = (p.batches.length + 1).toString().padStart(2, "0");
+        const bidCode = `${p.code}-T${nextN}`;
+        const last = p.batches[p.batches.length - 1];
+        
+        setProducts(ps => ps.map(prod => {
+            if (prod.id !== pid) return prod;
             const b = {
                 ...JSON.parse(JSON.stringify(last)),
-                id: uid(), bid: `${p.code}-T${nextN}`,
+                id: newBid, bid: bidCode,
                 name: `Trial ${nextN} (Copy)`, status: "draft"
             };
-            navTo("batch-detail", { pid, bid: b.id });
-            logActivity(`Duplicated batch as ${b.bid}`, T.amber);
-            return { ...p, batches: [...p.batches, b] };
+            return { ...prod, batches: [...prod.batches, b] };
         }));
+        
+        logActivity(`Duplicated batch as ${bidCode}`, "#F59E0B");
+        navTo("batch-detail", { pid, bid: newBid });
     };
 
     const saveBatch = (pid, bid, data) => {
