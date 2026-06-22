@@ -264,18 +264,38 @@ app.get('/api/data', async (req, res) => {
     const [productsRaw] = await pool.query('SELECT * FROM products');
     const [activity] = await pool.query('SELECT * FROM activity ORDER BY id DESC');
 
+    const cleanStr = (str) => {
+      if (typeof str !== 'string') return str;
+      let clean = str;
+      while (clean.includes('&amp;')) clean = clean.replace(/&amp;/g, '&');
+      return clean.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+    };
+
+    const cleanObj = (obj) => {
+      const newObj = { ...obj };
+      for (const key in newObj) {
+        if (typeof newObj[key] === 'string') {
+          newObj[key] = cleanStr(newObj[key]);
+        }
+      }
+      return newObj;
+    };
+
+    const cleanSuppliers = suppliers.map(cleanObj);
+    const cleanRms = rms.map(cleanObj);
+
     const products = productsRaw.map(p => {
       let parsed = [];
       try {
         parsed = typeof p.batches === 'string' ? JSON.parse(p.batches) : p.batches;
       } catch (e) {}
       return {
-        ...p,
+        ...cleanObj(p),
         batches: Array.isArray(parsed) ? parsed : []
       };
     });
 
-    res.json({ suppliers, rms, products, activity });
+    res.json({ suppliers: cleanSuppliers, rms: cleanRms, products, activity });
   } catch (err) {
     console.error("Fetch Data Error:", err);
     res.status(500).json({ error: 'Failed to fetch data' });
@@ -285,13 +305,13 @@ app.get('/api/data', async (req, res) => {
 // Input sanitization helper (Protects against XSS)
 const sanitizeStr = (val) => {
   if (typeof val !== 'string') return '';
-  return val.trim().replace(/[&<>'"]/g, tag => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    "'": '&#39;',
-    '"': '&quot;'
-  }[tag]));
+  let clean = val.trim();
+  // Decode any previously double-encoded HTML entities to fix corrupted data (e.g. SOMU &amp;amp; CO -> SOMU & CO)
+  while (clean.includes('&amp;')) {
+    clean = clean.replace(/&amp;/g, '&');
+  }
+  clean = clean.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+  return clean;
 };
 
 app.post('/api/save', async (req, res) => {
