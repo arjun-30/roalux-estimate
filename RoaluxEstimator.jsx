@@ -1177,15 +1177,13 @@ function AddRMModal({ open, onClose, suppliers, onSave }) {
 function AddProductModal({ open, onClose, onSave }) {
     const [code, setCode] = useState("");
     const [name, setName] = useState("");
-    const [cat, setCat] = useState("");
     const [bs, setBs] = useState("");
     const [desc, setDesc] = useState("");
-    const CATS = ["Cream", "Lotion", "Serum", "Gel", "Shampoo", "Conditioner", "Cleanser", "Mask", "Oil", "Tablet", "Capsule", "Syrup", "Powder", "Other"];
 
     const save = () => {
         if (!name || !code) return;
-        onSave({ code, name, cat: cat || "Other", batchSize: parseFloat(bs) || 100, desc, status: "development", batches: [] });
-        setCode(""); setName(""); setCat(""); setBs(""); setDesc("");
+        onSave({ code, name, cat: "", batchSize: parseFloat(bs) || 100, desc, status: "development", batches: [] });
+        setCode(""); setName(""); setBs(""); setDesc("");
         onClose();
     };
 
@@ -1196,13 +1194,7 @@ function AddProductModal({ open, onClose, onSave }) {
                     <div><FLabel>Product Code *</FLabel><FInput value={code} onChange={e => setCode(e.target.value)} placeholder="PRD-001" /></div>
                     <div><FLabel>Product Name *</FLabel><FInput value={name} onChange={e => setName(e.target.value)} placeholder="Hydrating Day Cream" /></div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div><FLabel>Category</FLabel>
-                        <FSelect value={cat} onChange={e => setCat(e.target.value)}>
-                            <option value="">Select…</option>
-                            {CATS.map(c => <option key={c}>{c}</option>)}
-                        </FSelect>
-                    </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
                     <div><FLabel>Standard Batch Size (kg)</FLabel><FInput type="number" value={bs} onChange={e => setBs(e.target.value)} placeholder="500" /></div>
                 </div>
                 <div><FLabel>Target Profile / Description</FLabel>
