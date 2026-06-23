@@ -1059,7 +1059,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                                     maxHeight: 200, overflowY: "auto", zIndex: 50, boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                                                     textAlign: "left"
                                                 }}>
-                                                    {state.rms.filter(rm => !r.searchText || rm.name.toLowerCase().includes(r.searchText.toLowerCase())).map(rm => {
+                                                    {state.rms.filter(rm => !r.searchText || rm.name.toLowerCase().startsWith(r.searchText.toLowerCase())).map(rm => {
                                                         const s = state.suppliers.find(x => x.id === rm.supplier);
                                                         return (
                                                             <div key={rm.id}
