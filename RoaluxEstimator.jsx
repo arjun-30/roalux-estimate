@@ -93,14 +93,12 @@ const PILL_MAP = {
 };
 
 function Pill({ status }) {
-    const [bg, color, dot, label] = PILL_MAP[status] || PILL_MAP.draft;
+    const [, color, , label] = PILL_MAP[status] || PILL_MAP.draft;
     return (
         <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            padding: "3px 9px", borderRadius: 20, fontSize: 11, fontWeight: 600,
-            fontFamily: "ui-monospace, Consolas, monospace", background: bg, color
+            fontSize: 11, fontWeight: 600,
+            fontFamily: "ui-monospace, Consolas, monospace", color
         }}>
-            <span style={{ width: 5, height: 5, borderRadius: "50%", background: dot, flexShrink: 0, display: "inline-block" }} />
             {label}
         </span>
     );
