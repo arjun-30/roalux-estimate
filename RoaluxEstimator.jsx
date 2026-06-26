@@ -390,7 +390,7 @@ function RawMaterials({ state, onNav, onAddRM }) {
                 }}>
                     <div style={{ flex: "1 1 180px" }}>Material</div>
                     <div style={{ flex: "1 1 140px" }}>Supplier</div>
-                    <div style={{ flex: "0 0 auto", textAlign: "right" }}>Price / kg</div>
+                    <div style={{ flex: "0 0 auto", textAlign: "right", marginLeft: "auto" }}>Price / kg</div>
                 </div>
             )}
 
