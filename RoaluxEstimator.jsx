@@ -601,7 +601,6 @@ function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicat
                     <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{p.name}</span>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
-                    <Btn variant="ghost" sm onClick={() => onDuplicate(pid)}>⊕ Duplicate Last</Btn>
                     <Btn variant="danger" sm onClick={() => {
                         if (confirm("Are you sure you want to delete this product? All batches will be lost.")) {
                             onDeleteProduct(pid);
@@ -850,14 +849,30 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
     const [wpl, setWpl] = useState(b?.wpl || "");
     const [remarks, setRemarks] = useState(b?.remarks || "");
     const [isEditingRemarks, setIsEditingRemarks] = useState(false);
+    const [printNoPrices, setPrintNoPrices] = useState(false);
+    
+    const handlePrintNoPrices = () => {
+        setPrintNoPrices(true);
+        setTimeout(() => {
+            window.print();
+            setPrintNoPrices(false);
+        }, 100);
+    };
+
     const [rows, setRows] = useState(() =>
         (b?.formula || []).map(r => ({ _id: uid(), rmId: r.rmId, qty: String(r.qty) }))
     );
 
-    const addRow = () => setRows(rs => {
+    const addRow = (focusNew = false) => setRows(rs => {
         if (rs.length >= 27) {
             showToast("Maximum 27 ingredients allowed per estimate", "error");
             return rs;
+        }
+        if (focusNew) {
+            setTimeout(() => {
+                const el = document.getElementById(`rm-input-${rs.length}`);
+                if (el) el.focus();
+            }, 50);
         }
         return [...rs, { _id: uid(), rmId: "", qty: "" }];
     });
@@ -937,6 +952,14 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         </svg>
                         Print Invoice
                     </button>
+                    <button className="btn btn-ghost" onClick={handlePrintNoPrices} style={{ display: "flex", alignItems: "center", background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#4B5563", fontSize: 13, padding: "8px 16px", borderRadius: 8, boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        Print w/o Prices
+                    </button>
                     {b.status !== "finalized" ? (
                         <button className="btn btn-primary" onClick={handleFinalize} style={{ display: "flex", alignItems: "center", fontSize: 13, padding: "8px 16px", borderRadius: 8, background: "#10B981", border: "1px solid #059669", color: "white" }}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
@@ -966,7 +989,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
             </div>
 
             {/* Invoice Card */}
-            <div className="print-main" style={{
+            <div className={`print-main ${printNoPrices ? "hide-prices-print" : ""}`} style={{
                 background: "white", padding: 40, fontFamily: "'Inter',sans-serif",
                 color: "#111827", boxShadow: "0 4px 20px rgba(0,0,0,.05)",
                 position: "relative", overflow: "hidden",
@@ -1065,7 +1088,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         <tr>
                             <th style={{ width: 40, textAlign: "center", fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".5px", padding: "12px 16px", borderBottom: "1px solid #E5E7EB", background: "#F3F4F6" }}>#</th>
                             {["Ingredient", "Weight (kg)", "Rate/Kg", "Cost", ""].map((h, i) => (
-                                <th key={h} className={i === 4 ? "no-print" : ""} style={{
+                                <th key={h} className={`${i === 4 ? "no-print" : ""} ${i >= 2 && i <= 3 ? "price-col" : ""}`.trim()} style={{
                                     textAlign: i >= 1 && i <= 3 ? "right" : "left",
                                     fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase",
                                     letterSpacing: ".5px", padding: "12px 16px",
@@ -1085,6 +1108,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                     <td style={{ padding: "12px 16px", borderBottom: "1px solid #F3F4F6", verticalAlign: "middle" }}>
                                         <div style={{ position: "relative", zIndex: r.showList ? 50 : 1 }}>
                                             <input
+                                                id={`rm-input-${i}`}
                                                 placeholder="Search ingredient…"
                                                 value={r.rmObj && !r.searchText ? r.rmObj.name : r.searchText || ""}
                                                 onChange={e => {
@@ -1134,19 +1158,25 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                         <input
                                             type="number" value={r.qty}
                                             onChange={e => updateRow(r._id, "qty", e.target.value)}
+                                            onKeyDown={e => {
+                                                if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    addRow(true);
+                                                }
+                                            }}
                                             style={{
                                                 width: 80, textAlign: "right", fontFamily: "inherit",
                                                 border: "1px solid #E5E7EB", background: "#F3F4F6",
                                                 padding: "6px 12px", borderRadius: 6, fontSize: 14, fontWeight: 600, outline: "none"
                                             }} />
                                     </td>
-                                    <td style={{
+                                    <td className="price-col" style={{
                                         padding: "12px 16px", borderBottom: "1px solid #F3F4F6", textAlign: "right",
                                         fontFamily: "ui-monospace, Consolas, monospace", color: T.muted, fontSize: 13
                                     }}>
                                         {r.rmObj ? fmtINR(r.rate) : "—"}
                                     </td>
-                                    <td style={{
+                                    <td className="price-col" style={{
                                         padding: "12px 16px", borderBottom: "1px solid #F3F4F6", textAlign: "right",
                                         fontFamily: "ui-monospace, Consolas, monospace", fontWeight: 600, fontSize: 14
                                     }}>
@@ -1167,16 +1197,16 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                 <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
                                 <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
                                 <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
-                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
-                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                                <td className="price-col" style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                                <td className="price-col" style={{ borderBottom: "1px solid #F3F4F6" }}></td>
                                 <td className="no-print" style={{ borderBottom: "1px solid #F3F4F6" }}></td>
                             </tr>
                         ))}
                         <tr className="print-total-row" style={{ background: "#F9FAFB", borderTop: "2px solid #E5E7EB" }}>
                             <td colSpan={2} style={{ padding: "16px 16px", textAlign: "right", fontWeight: 700, fontSize: 11, color: "#6B7280", textTransform: "uppercase", letterSpacing: 1 }}>Total</td>
                             <td style={{ padding: "16px 12px", textAlign: "right", fontWeight: 800, fontSize: 16, fontFamily: "ui-monospace, Consolas, monospace" }}>{totalQty.toFixed(2)}</td>
-                            <td></td>
-                            <td style={{ padding: "16px 16px", textAlign: "right", fontWeight: 800, fontSize: 16, fontFamily: "ui-monospace, Consolas, monospace" }}>{fmtINR(totalCost)}</td>
+                            <td className="price-col"></td>
+                            <td className="price-col" style={{ padding: "16px 16px", textAlign: "right", fontWeight: 800, fontSize: 16, fontFamily: "ui-monospace, Consolas, monospace" }}>{fmtINR(totalCost)}</td>
                             <td className="no-print"></td>
                         </tr>
                     </tbody>
@@ -1184,14 +1214,14 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                 {(() => {
                     const wplValue = parseFloat(wpl);
                     if (!isNaN(wplValue) && wplValue > 0 && totalQty > 0) {
-                        const totalLitres = totalQty * wplValue;
+                        const totalLitres = totalQty / wplValue;
                         const costPerLitre = totalCost / totalLitres;
                         return (
                             <div style={{ marginTop: 16, padding: "12px 16px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                 <div style={{ fontSize: 13, color: "#166534", fontWeight: 600 }}>
                                     Estimated Volume: {totalLitres.toFixed(2)} Litres <span style={{ opacity: 0.7, fontWeight: 500, marginLeft: 4 }}>(WPL: {wplValue})</span>
                                 </div>
-                                <div style={{ fontSize: 15, color: "#166534", fontWeight: 800 }}>
+                                <div className="price-col" style={{ fontSize: 15, color: "#166534", fontWeight: 800 }}>
                                     Cost per Litre: {fmtINR(costPerLitre)}
                                 </div>
                             </div>
@@ -1287,8 +1317,8 @@ function AddProductModal({ open, onClose, onSave }) {
         <Modal open={open} onClose={onClose} title="New Product">
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div><FLabel>Product Code *</FLabel><FInput value={code} onChange={e => setCode(e.target.value)} placeholder="PRD-001" /></div>
                     <div><FLabel>Product Name *</FLabel><FInput value={name} onChange={e => setName(e.target.value)} placeholder="Hydrating Day Cream" /></div>
+                    <div><FLabel>Product Code *</FLabel><FInput value={code} onChange={e => setCode(e.target.value)} placeholder="PRD-001" /></div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
                     <div><FLabel>Standard Batch Size (kg)</FLabel><FInput type="number" value={bs} onChange={e => setBs(e.target.value)} placeholder="500" /></div>
@@ -1630,7 +1660,11 @@ export default function App() {
         const p = products.find(x => x.id === pid);
         if (!p) return;
         const newBid = uid();
-        const nextN = (p.batches.length + 1).toString().padStart(2, "0");
+        const maxN = p.batches.reduce((max, b) => {
+            const match = b.bid && b.bid.match(/-T(\d+)$/);
+            return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const nextN = (maxN + 1).toString().padStart(2, "0");
         const bidCode = `${p.code}-T${nextN}`;
         
         setProducts(ps => ps.map(prod => {
@@ -1655,7 +1689,11 @@ export default function App() {
         if (!sourceBatch) return;
 
         const newBid = uid();
-        const nextN = (p.batches.length + 1).toString().padStart(2, "0");
+        const maxN = p.batches.reduce((max, b) => {
+            const match = b.bid && b.bid.match(/-T(\d+)$/);
+            return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const nextN = (maxN + 1).toString().padStart(2, "0");
         const bidCode = `${p.code}-T${nextN}`;
         
         setProducts(ps => ps.map(prod => {
@@ -1813,23 +1851,20 @@ export default function App() {
                 </div>
 
                 {/* Content */}
-                <div className="print-main" style={{ flex: 1, overflowY: "auto", padding: "22px 24px", display: "flex", flexDirection: "column", gap: 18 }}>
-                    {view === "dashboard" && <Dashboard state={state} onNav={navTo} />}
-                    {view === "rawmaterials" && <RawMaterials state={state} onNav={navTo} onAddRM={() => setShowAddRM(true)} />}
-                    {view === "rm-detail" && <RMDetail state={state} rmId={viewParams.rmId}
-                        onBack={() => navTo("rawmaterials")} onUpdateRM={updateRM} onDeleteRM={deleteRM} />}
-                    {view === "products" && <Products state={state} onNav={navTo} onAddProduct={() => setShowAddProd(true)} />}
-                    {view === "product-detail" && <ProductDetail state={state} pid={viewParams.pid}
-                        onBack={() => navTo("products")}
-                        onOpenBatch={(pid, bid) => navTo("batch-detail", { pid, bid })}
-                        onAddBatch={addBatch}
-                        onDuplicate={duplicateBatch}
-                        onDeleteProduct={deleteProduct}
-                        onDeleteBatch={deleteBatch} />}
-                    {view === "batch-detail" && <BatchDetail
-                        state={state} pid={viewParams.pid} bid={viewParams.bid}
-                        onBack={() => navTo("product-detail", { pid: viewParams.pid })}
-                        onSave={saveBatch} showToast={showToast} />}
+                <div className="print-main" style={{ flex: 1, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                    <div className="print-view-wrapper" style={{ position: "absolute", inset: 0, overflowY: "auto", padding: "22px 24px", display: view === "dashboard" ? "flex" : "none", flexDirection: "column", gap: 18 }}>
+                        <Dashboard state={state} onNav={navTo} />
+                    </div>
+                    <div className="print-view-wrapper" style={{ position: "absolute", inset: 0, overflowY: "auto", padding: "22px 24px", display: view === "rawmaterials" ? "flex" : "none", flexDirection: "column", gap: 18 }}>
+                        <RawMaterials state={state} onNav={navTo} onAddRM={() => setShowAddRM(true)} />
+                    </div>
+                    {view === "rm-detail" && <div className="print-view-wrapper" style={{ position: "absolute", inset: 0, overflowY: "auto", padding: "22px 24px", display: "flex", flexDirection: "column", gap: 18 }}><RMDetail state={state} rmId={viewParams.rmId} onBack={() => navTo("rawmaterials")} onUpdateRM={updateRM} onDeleteRM={deleteRM} /></div>}
+                    
+                    <div className="print-view-wrapper" style={{ position: "absolute", inset: 0, overflowY: "auto", padding: "22px 24px", display: view === "products" ? "flex" : "none", flexDirection: "column", gap: 18 }}>
+                        <Products state={state} onNav={navTo} onAddProduct={() => setShowAddProd(true)} />
+                    </div>
+                    {view === "product-detail" && <div className="print-view-wrapper" style={{ position: "absolute", inset: 0, overflowY: "auto", padding: "22px 24px", display: "flex", flexDirection: "column", gap: 18 }}><ProductDetail state={state} pid={viewParams.pid} onBack={() => navTo("products")} onOpenBatch={(pid, bid) => navTo("batch-detail", { pid, bid })} onAddBatch={addBatch} onDuplicate={duplicateBatch} onDeleteProduct={deleteProduct} onDeleteBatch={deleteBatch} /></div>}
+                    {view === "batch-detail" && <div className="print-view-wrapper" style={{ position: "absolute", inset: 0, overflowY: "auto", padding: "22px 24px", display: "flex", flexDirection: "column", gap: 18 }}><BatchDetail state={state} pid={viewParams.pid} bid={viewParams.bid} onBack={() => navTo("product-detail", { pid: viewParams.pid })} onSave={saveBatch} showToast={showToast} /></div>}
                 </div>
             </div>
 
@@ -1937,6 +1972,8 @@ export default function App() {
         .print-empty-row { display: none; }
 
         @media print {
+            .hide-prices-print .price-col { display: none !important; }
+            .print-view-wrapper { position: static !important; overflow: visible !important; }
             @page { margin: 12mm 15mm; size: A4; }
             html, body { 
                 margin: 0 !important; 
