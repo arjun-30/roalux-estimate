@@ -1194,11 +1194,11 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         })}
                         {Array.from({ length: Math.max(0, 27 - rowsCalc.length) }).map((_, i) => (
                             <tr key={`empty-${i}`} className="print-empty-row">
-                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
-                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
-                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
-                                <td className="price-col" style={{ borderBottom: "1px solid #F3F4F6" }}></td>
-                                <td className="price-col" style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                                <td style={{ borderBottom: "1px solid #F3F4F6" }}>&nbsp;</td>
+                                <td style={{ borderBottom: "1px solid #F3F4F6" }}>&nbsp;<div className="print-supplier" style={{ minHeight: 13, margin: 0 }}></div></td>
+                                <td style={{ borderBottom: "1px solid #F3F4F6" }}>&nbsp;</td>
+                                <td className="price-col" style={{ borderBottom: "1px solid #F3F4F6" }}>&nbsp;</td>
+                                <td className="price-col" style={{ borderBottom: "1px solid #F3F4F6" }}>&nbsp;</td>
                                 <td className="no-print" style={{ borderBottom: "1px solid #F3F4F6" }}></td>
                             </tr>
                         ))}
@@ -2073,7 +2073,7 @@ export default function App() {
                 margin-top: 0px !important;
                 color: #555 !important;
             }
-            .print-empty-row { display: none !important; }
+            .print-empty-row { display: table-row !important; }
             .print-only { display: block !important; }
         }
       `}</style>
