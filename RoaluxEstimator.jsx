@@ -2037,6 +2037,7 @@ export default function App() {
                 border-collapse: collapse !important;
                 border: 1px solid black !important;
                 width: 100% !important;
+                height: 160mm !important;
             }
             table th {
                 background: #E5E7EB !important;
@@ -2073,7 +2074,7 @@ export default function App() {
                 margin-top: 0px !important;
                 color: #555 !important;
             }
-            .print-empty-row { display: table-row !important; }
+            .print-empty-row { display: none !important; }
             .print-only { display: block !important; }
         }
       `}</style>

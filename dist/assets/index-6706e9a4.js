@@ -196,6 +196,7 @@ Error generating stack: `+o.message+`
                 border-collapse: collapse !important;
                 border: 1px solid black !important;
                 width: 100% !important;
+                height: 160mm !important;
             }
             table th {
                 background: #E5E7EB !important;
@@ -232,7 +233,7 @@ Error generating stack: `+o.message+`
                 margin-top: 0px !important;
                 color: #555 !important;
             }
-            .print-empty-row { display: table-row !important; }
+            .print-empty-row { display: none !important; }
             .print-only { display: block !important; }
         }
       `})]}):s.jsx("div",{style:{height:"100vh",background:C.bg}}):s.jsx(uf,{onLogin:t})}const kc=document.createElement("style");kc.innerHTML=`
