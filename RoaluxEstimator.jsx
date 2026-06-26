@@ -479,7 +479,7 @@ function RMDetail({ state, rmId, onBack, onUpdateRM, onDeleteRM }) {
                                 fontWeight: 700, color: T.muted, marginBottom: 3
                             }}>{l}</div>
                             <div style={{
-                                fontSize: 13, fontWeight: 600, color: T.text,
+                                fontSize: 13, fontWeight: 600,
                                 fontFamily: l === "Price Purchased" ? "ui-monospace, Consolas, monospace" : undefined,
                                 color: l === "Price Purchased" ? T.amberDim : T.text
                             }}>{v}</div>
@@ -583,7 +583,7 @@ function Products({ state, onNav, onAddProduct }) {
 }
 
 // ─── PRODUCT DETAIL ───────────────────────────────────────────────────────────
-function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicate }) {
+function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicate, onDeleteProduct, onDeleteBatch }) {
     const p = state.products.find(x => x.id === pid);
     if (!p) return <EmptyState icon="◈" title="Not found" />;
     const formulaBatches = p.batches.filter(b => b.type === "formula" || !b.type);
@@ -602,6 +602,11 @@ function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicat
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                     <Btn variant="ghost" sm onClick={() => onDuplicate(pid)}>⊕ Duplicate Last</Btn>
+                    <Btn variant="danger" sm onClick={() => {
+                        if (confirm("Are you sure you want to delete this product? All batches will be lost.")) {
+                            onDeleteProduct(pid);
+                        }
+                    }}>Delete Product</Btn>
                 </div>
             </div>
 
@@ -612,7 +617,7 @@ function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicat
                         {!formulaBatches.length
                             ? <EmptyState icon="🧪" title="No batches yet" hint='Click "+ New Trial Batch" to begin' />
                             : <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                <thead><tr>{["Batch ID", "Name", "Status"].map(h => (
+                                <thead><tr>{["Batch ID", "Name", "Status", ""].map(h => (
                                     <th key={h} style={{
                                         textAlign: "left", fontSize: 10, textTransform: "uppercase",
                                         letterSpacing: 1, color: T.muted, fontWeight: 700, padding: "9px 13px",
@@ -623,10 +628,22 @@ function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicat
                                     {formulaBatches.map(b => {
                                         const isFinalized = b.status === "finalized";
                                         return (
-                                        <tr key={b.id} className="clickable-tr" style={{ cursor: "pointer", transition: "all .15s", background: isFinalized ? "#F0FDF4" : "transparent" }} onClick={() => onOpenBatch(pid, b.id)}>
-                                            <td style={{ padding: "11px 13px", fontFamily: "ui-monospace, Consolas, monospace", fontSize: 12, borderBottom: `1px solid #F3F4F6`, borderLeft: isFinalized ? "3px solid #10B981" : "3px solid transparent" }}>{b.bid}</td>
-                                            <td style={{ padding: "11px 13px", fontWeight: 600, maxWidth: 200, borderBottom: `1px solid #F3F4F6` }}>{b.name}</td>
-                                            <td style={{ padding: "11px 13px", borderBottom: `1px solid #F3F4F6` }}><Pill status={b.status || "draft"} /></td>
+                                        <tr key={b.id} className="clickable-tr" style={{ cursor: "pointer", transition: "all .15s", background: isFinalized ? "#F0FDF4" : "transparent" }}>
+                                            <td onClick={() => onOpenBatch(pid, b.id)} style={{ padding: "11px 13px", fontFamily: "ui-monospace, Consolas, monospace", fontSize: 12, borderBottom: `1px solid #F3F4F6`, borderLeft: isFinalized ? "3px solid #10B981" : "3px solid transparent" }}>{b.bid}</td>
+                                            <td onClick={() => onOpenBatch(pid, b.id)} style={{ padding: "11px 13px", fontWeight: 600, maxWidth: 200, borderBottom: `1px solid #F3F4F6` }}>{b.name}</td>
+                                            <td onClick={() => onOpenBatch(pid, b.id)} style={{ padding: "11px 13px", borderBottom: `1px solid #F3F4F6` }}><Pill status={b.status || "draft"} /></td>
+                                            <td style={{ padding: "11px 13px", borderBottom: `1px solid #F3F4F6`, textAlign: "right" }}>
+                                                <button className="del-btn" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (confirm("Are you sure you want to delete this trial?")) {
+                                                        onDeleteBatch(pid, b.id);
+                                                    }
+                                                }} style={{
+                                                    width: 28, height: 28, borderRadius: 6, border: "1px solid transparent",
+                                                    background: "transparent", color: "#9CA3AF", display: "inline-flex",
+                                                    alignItems: "center", justifyContent: "center", fontSize: 18, cursor: "pointer"
+                                                }}>×</button>
+                                            </td>
                                         </tr>
                                     )})}
                                 </tbody>
@@ -1114,6 +1131,16 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                 </tr>
                             );
                         })}
+                        {Array.from({ length: Math.max(0, 27 - rowsCalc.length) }).map((_, i) => (
+                            <tr key={`empty-${i}`} className="print-empty-row">
+                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                                <td style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                                <td className="no-print" style={{ borderBottom: "1px solid #F3F4F6" }}></td>
+                            </tr>
+                        ))}
                         <tr className="print-total-row" style={{ background: "#F9FAFB", borderTop: "2px solid #E5E7EB" }}>
                             <td colSpan={2} style={{ padding: "16px 16px", textAlign: "right", fontWeight: 700, fontSize: 11, color: "#6B7280", textTransform: "uppercase", letterSpacing: 1 }}>Total</td>
                             <td style={{ padding: "16px 12px", textAlign: "right", fontWeight: 800, fontSize: 16, fontFamily: "ui-monospace, Consolas, monospace" }}>{totalQty.toFixed(2)}</td>
@@ -1606,6 +1633,23 @@ export default function App() {
         }));
     };
 
+    const deleteProduct = (pid) => {
+        const p = products.find(x => x.id === pid);
+        setProducts(ps => ps.filter(x => x.id !== pid));
+        logActivity(`Deleted product ${p?.name || ""}`, "#EF4444");
+        showToast("Product deleted", "success");
+        navTo("products");
+    };
+
+    const deleteBatch = (pid, bid) => {
+        setProducts(ps => ps.map(p => {
+            if (p.id !== pid) return p;
+            return { ...p, batches: p.batches.filter(b => b.id !== bid) };
+        }));
+        logActivity(`Deleted trial batch`, "#EF4444");
+        showToast("Batch deleted", "success");
+    };
+
     // ── Sidebar nav items ──
     const NAV = [
         { id: "rawmaterials", label: "Raw Materials", icon: "●", badge: rms.length, badgeColor: "#3B82F6" },
@@ -1728,7 +1772,9 @@ export default function App() {
                         onBack={() => navTo("products")}
                         onOpenBatch={(pid, bid) => navTo("batch-detail", { pid, bid })}
                         onAddBatch={addBatch}
-                        onDuplicate={duplicateBatch} />}
+                        onDuplicate={duplicateBatch}
+                        onDeleteProduct={deleteProduct}
+                        onDeleteBatch={deleteBatch} />}
                     {view === "batch-detail" && <BatchDetail
                         state={state} pid={viewParams.pid} bid={viewParams.bid}
                         onBack={() => navTo("product-detail", { pid: viewParams.pid })}
@@ -1837,6 +1883,8 @@ export default function App() {
             color: #3B82F6 !important;
         }
 
+        .print-empty-row { display: none; }
+
         @media print {
             @page { margin: 12mm 15mm; size: A4; }
             html, body { 
@@ -1929,6 +1977,8 @@ export default function App() {
                 margin-top: 0px !important;
                 color: #555 !important;
             }
+            .print-empty-row { display: table-row !important; }
+            .print-empty-row td { height: 27.5px !important; }
         }
       `}</style>
         </div>
