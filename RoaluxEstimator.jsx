@@ -632,8 +632,16 @@ function ProductDetail({ state, pid, onBack, onOpenBatch, onAddBatch, onDuplicat
                                             <td onClick={() => onOpenBatch(pid, b.id)} style={{ padding: "11px 13px", fontFamily: "ui-monospace, Consolas, monospace", fontSize: 12, borderBottom: `1px solid #F3F4F6`, borderLeft: isFinalized ? "3px solid #10B981" : "3px solid transparent" }}>{b.bid}</td>
                                             <td onClick={() => onOpenBatch(pid, b.id)} style={{ padding: "11px 13px", fontWeight: 600, maxWidth: 200, borderBottom: `1px solid #F3F4F6` }}>{b.name}</td>
                                             <td onClick={() => onOpenBatch(pid, b.id)} style={{ padding: "11px 13px", borderBottom: `1px solid #F3F4F6` }}><Pill status={b.status || "draft"} /></td>
-                                            <td style={{ padding: "11px 13px", borderBottom: `1px solid #F3F4F6`, textAlign: "right" }}>
-                                                <button className="del-btn" onClick={(e) => {
+                                            <td style={{ padding: "11px 13px", borderBottom: `1px solid #F3F4F6`, textAlign: "right", whiteSpace: "nowrap" }}>
+                                                <button className="del-btn" title="Duplicate Trial" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onDuplicate(pid, b.id);
+                                                }} style={{
+                                                    width: 28, height: 28, borderRadius: 6, border: "1px solid transparent",
+                                                    background: "transparent", color: "#9CA3AF", display: "inline-flex",
+                                                    alignItems: "center", justifyContent: "center", fontSize: 16, cursor: "pointer", marginRight: 4
+                                                }}>⎘</button>
+                                                <button className="del-btn" title="Delete Trial" onClick={(e) => {
                                                     e.stopPropagation();
                                                     if (confirm("Are you sure you want to delete this trial?")) {
                                                         onDeleteBatch(pid, b.id);
@@ -1598,19 +1606,21 @@ export default function App() {
         navTo("batch-detail", { pid, bid: newBid });
     };
 
-    const duplicateBatch = (pid) => {
+    const duplicateBatch = (pid, sourceBid = null) => {
         const p = products.find(x => x.id === pid);
         if (!p || !p.batches.length) return;
         
+        const sourceBatch = sourceBid ? p.batches.find(b => b.id === sourceBid) : p.batches[p.batches.length - 1];
+        if (!sourceBatch) return;
+
         const newBid = uid();
         const nextN = (p.batches.length + 1).toString().padStart(2, "0");
         const bidCode = `${p.code}-T${nextN}`;
-        const last = p.batches[p.batches.length - 1];
         
         setProducts(ps => ps.map(prod => {
             if (prod.id !== pid) return prod;
             const b = {
-                ...JSON.parse(JSON.stringify(last)),
+                ...JSON.parse(JSON.stringify(sourceBatch)),
                 id: newBid, bid: bidCode,
                 name: `Trial ${nextN} (Copy)`, status: "draft"
             };
