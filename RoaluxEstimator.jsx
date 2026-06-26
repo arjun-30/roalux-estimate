@@ -887,12 +887,27 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
     };
 
     const handleFinalize = () => {
+        const hasFinalized = p.batches.find(x => x.id !== bid && x.status === "finalized");
+        if (hasFinalized) {
+            showToast(`Cannot finalize. Trial ${hasFinalized.name || hasFinalized.bid} is already finalized. Unfinalize it first.`, "error");
+            return;
+        }
         if (confirm("Are you sure you want to finalize this trial?")) {
             const formula = rowsCalc
                 .filter(r => r.rmId && parseFloat(r.qty) > 0)
                 .map(r => ({ rmId: r.rmId, qty: parseFloat(r.qty), pct: (parseFloat(r.qty) / req) * 100 }));
             onSave(pid, bid, { name: batchName, size: req, gloss, viscosity, wpl, formula, remarks, status: "finalized" });
             showToast("Trial finalized successfully!", "success");
+        }
+    };
+
+    const handleUnfinalize = () => {
+        if (confirm("Are you sure you want to unfinalize this trial?")) {
+            const formula = rowsCalc
+                .filter(r => r.rmId && parseFloat(r.qty) > 0)
+                .map(r => ({ rmId: r.rmId, qty: parseFloat(r.qty), pct: (parseFloat(r.qty) / req) * 100 }));
+            onSave(pid, bid, { name: batchName, size: req, gloss, viscosity, wpl, formula, remarks, status: "draft" });
+            showToast("Trial unfinalized.", "success");
         }
     };
 
@@ -922,13 +937,21 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         </svg>
                         Print Invoice
                     </button>
-                    {b.status !== "finalized" && (
+                    {b.status !== "finalized" ? (
                         <button className="btn btn-primary" onClick={handleFinalize} style={{ display: "flex", alignItems: "center", fontSize: 13, padding: "8px 16px", borderRadius: 8, background: "#10B981", border: "1px solid #059669", color: "white" }}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                             </svg>
                             Finalize Trial
+                        </button>
+                    ) : (
+                        <button className="btn btn-primary" onClick={handleUnfinalize} style={{ display: "flex", alignItems: "center", fontSize: 13, padding: "8px 16px", borderRadius: 8, background: "#EF4444", border: "1px solid #DC2626", color: "white" }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Unfinalize Trial
                         </button>
                     )}
                     <button className="btn btn-primary" onClick={handleSave} style={{ display: "flex", alignItems: "center", fontSize: 13, padding: "8px 20px", borderRadius: 8 }}>
@@ -1105,7 +1128,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="print-supplier" style={{ fontSize: 11, color: "#9CA3AF", paddingLeft: 4, fontWeight: 500, marginTop: 0, minHeight: 13 }}>{sup ? sup.name : "\u00A0"}</div>
+                                        <div className="print-supplier" style={{ fontSize: 11, color: "#9CA3AF", paddingLeft: 4, fontWeight: 500, marginTop: 0, minHeight: 13 }}>{r.rmObj ? (sup?.name || r.rmObj.supplier || "\u00A0") : "\u00A0"}</div>
                                     </td>
                                     <td style={{ padding: "12px 16px", borderBottom: "1px solid #F3F4F6", textAlign: "right" }}>
                                         <input
@@ -1158,6 +1181,24 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         </tr>
                     </tbody>
                 </table>
+                {(() => {
+                    const wplValue = parseFloat(wpl);
+                    if (!isNaN(wplValue) && wplValue > 0 && totalQty > 0) {
+                        const totalLitres = totalQty * wplValue;
+                        const costPerLitre = totalCost / totalLitres;
+                        return (
+                            <div style={{ marginTop: 16, padding: "12px 16px", background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <div style={{ fontSize: 13, color: "#166534", fontWeight: 600 }}>
+                                    Estimated Volume: {totalLitres.toFixed(2)} Litres <span style={{ opacity: 0.7, fontWeight: 500, marginLeft: 4 }}>(WPL: {wplValue})</span>
+                                </div>
+                                <div style={{ fontSize: 15, color: "#166534", fontWeight: 800 }}>
+                                    Cost per Litre: {fmtINR(costPerLitre)}
+                                </div>
+                            </div>
+                        );
+                    }
+                    return null;
+                })()}
                 <div className="no-print" style={{ marginTop: 16, position: "relative", zIndex: 2 }}>
                     {rows.length < 27 ? (
                         <Btn variant="ghost" sm onClick={addRow}>+ Add Ingredient</Btn>
