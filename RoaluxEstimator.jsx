@@ -1259,8 +1259,16 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                             </div>
                         </div>
                     ) : (
-                        <div className="no-print" style={{ marginTop: 32 }}>
-                            <Btn variant="ghost" sm onClick={() => setIsEditingRemarks(true)}>+ Add Remarks</Btn>
+                        <div style={{ marginTop: 32 }}>
+                            <div className="no-print">
+                                <Btn variant="ghost" sm onClick={() => setIsEditingRemarks(true)}>+ Add Remarks</Btn>
+                            </div>
+                            <div className="print-only print-remarks-wrapper" style={{ display: "none" }}>
+                                <div className="remarks-preview-box" style={{ padding: 16, border: "1px dashed #E5E7EB", borderRadius: 8, background: "#F9FAFB", minHeight: 60 }}>
+                                    <div style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.5 }}>Remarks</div>
+                                    <div style={{ minHeight: 20 }}></div>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -2065,8 +2073,8 @@ export default function App() {
                 margin-top: 0px !important;
                 color: #555 !important;
             }
-            .print-empty-row { display: table-row !important; }
-            .print-empty-row td { height: 27.5px !important; }
+            .print-empty-row { display: none !important; }
+            .print-only { display: block !important; }
         }
       `}</style>
         </div>
