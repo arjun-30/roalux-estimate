@@ -1159,7 +1159,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="print-supplier" style={{ fontSize: 11, color: "#9CA3AF", paddingLeft: 4, fontWeight: 500, marginTop: 0, minHeight: 13 }}>{r.rmObj ? (sup?.name || r.rmObj.supplier || "\u00A0") : "\u00A0"}</div>
+                                        <div className="print-supplier" style={{ fontSize: 11, color: "#9CA3AF", paddingLeft: 4, fontWeight: 500, marginTop: 6, minHeight: 13 }}>{r.rmObj ? (sup?.name || r.rmObj.supplier || "\u00A0") : "\u00A0"}</div>
                                     </td>
                                     <td style={{ padding: "12px 16px", borderBottom: "1px solid #F3F4F6", textAlign: "right" }}>
                                         <input
