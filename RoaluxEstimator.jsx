@@ -1083,6 +1083,13 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
 
 
                 {/* Table */}
+                <style>{`
+                    @media print {
+                        .dynamic-print-row td {
+                            height: calc(148mm / ${Math.max(1, rowsCalc.length)}) !important;
+                        }
+                    }
+                `}</style>
                 <table style={{ width: "100%", borderCollapse: "collapse", position: "relative", zIndex: 10 }}>
                     <thead>
                         <tr>
@@ -1101,7 +1108,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                         {rowsCalc.map((r, i) => {
                             const sup = r.rmObj ? state.suppliers.find(x => x.id === r.rmObj.supplier) : null;
                             return (
-                                <tr key={r._id}>
+                                <tr key={r._id} className="dynamic-print-row">
                                     <td style={{ textAlign: "center", padding: "12px 16px", borderBottom: "1px solid #F3F4F6", verticalAlign: "middle", fontFamily: "ui-monospace, Consolas, monospace", fontSize: 13, color: T.muted }}>
                                         {i + 1}.
                                     </td>
@@ -2049,9 +2056,9 @@ export default function App() {
                 font-size: 11px !important;
             }
             table th, table td {
-                padding: 3px 8px !important;
+                padding: 1px 4px !important;
                 font-size: 11px !important;
-                line-height: 1.1 !important;
+                line-height: 1 !important;
                 border: 1px solid black !important;
                 color: black !important;
             }
@@ -2070,7 +2077,7 @@ export default function App() {
             .print-supplier {
                 font-size: 9px !important;
                 line-height: 1 !important;
-                min-height: 10px !important;
+                min-height: 8px !important;
                 margin-top: 0px !important;
                 color: #555 !important;
             }
