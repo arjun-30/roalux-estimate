@@ -1792,7 +1792,7 @@ export default function App() {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
                     <img src="./logo.png" alt="ROALUX Logo" width="128" height="32" style={{ height: 32, width: "auto", objectFit: "contain" }} />
                      <div style={{ width: 128, display: "flex", justifyContent: "center" }}>
-                         <div style={{ fontSize: 12, color: "#fff", fontWeight: 700, letterSpacing: "6px", marginRight: "-6px", marginTop: "-2px" }}>PAINTS</div>
+                         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", fontWeight: 700, letterSpacing: "6px", marginRight: "-6px", marginTop: "-2px" }}>PAINTS</div>
                      </div>
                  </div>
 
