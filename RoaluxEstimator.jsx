@@ -1789,12 +1789,10 @@ export default function App() {
                 flexWrap: "wrap", gap: 12
             }}>
                 {/* Logo & Brand */}
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
                     <img src="./logo.png" alt="ROALUX Logo" width="128" height="32" style={{ height: 32, width: "auto", objectFit: "contain" }} />
                     <div style={{
-                        fontSize: 11, color: "rgba(255,255,255,.4)", textTransform: "uppercase",
-                        letterSpacing: "1.5px", fontWeight: 600, borderLeft: "1px solid rgba(255,255,255,.15)", paddingLeft: 14
-                    }}>Estimator v2</div>
+                        <div style={{ fontSize: 12, color: "#fff", marginTop: 4 }}>PAINTS</div>
                 </div>
 
                 {/* Nav Links */}
