@@ -1791,9 +1791,10 @@ export default function App() {
                 {/* Logo & Brand */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
                     <img src="./logo.png" alt="ROALUX Logo" width="128" height="32" style={{ height: 32, width: "auto", objectFit: "contain" }} />
-                    <div style={{
-                        <div style={{ fontSize: 12, color: "#fff", marginTop: 4 }}>PAINTS</div>
-                </div>
+                     <div style={{ /* your styles */ }}>
+                         <div style={{ fontSize: 12, color: "#fff", marginTop: 4 }}>PAINTS</div>
+                     </div>
+                 </div>
 
                 {/* Nav Links */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
