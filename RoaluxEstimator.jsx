@@ -390,7 +390,7 @@ function RawMaterials({ state, onNav, onAddRM }) {
                 }}>
                     <div style={{ flex: "1 1 180px" }}>Material</div>
                     <div style={{ flex: "1 1 140px" }}>Supplier</div>
-                    <div style={{ flex: "0 0 auto", textAlign: "right", marginLeft: "auto" }}>Price / kg</div>
+                    <div style={{ flex: "0 0 120px", textAlign: "right", marginLeft: "auto" }}>Price / kg</div>
                 </div>
             )}
 
@@ -417,7 +417,7 @@ function RawMaterials({ state, onNav, onAddRM }) {
                                 {sup ? sup.name : rm.supplier || "No supplier"}
                             </div>
                             <div style={{
-                                flex: "0 0 auto", textAlign: "right", fontSize: 14,
+                                flex: "0 0 120px", textAlign: "right", fontSize: 14,
                                 fontWeight: 700, color: T.amberDim, letterSpacing: "-0.3px", marginLeft: "auto"
                             }}>
                                 {fmtINR(rm.price)}
