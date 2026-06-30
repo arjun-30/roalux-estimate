@@ -341,6 +341,13 @@ app.post('/api/save', async (req, res) => {
           Number(p.batchSize) || 0, sanitizeStr(p.desc), sanitizeStr(p.status), batchesJson
         ]);
       }
+      
+      const pIds = products.map(p => String(p.id));
+      if (pIds.length > 0) {
+        await connection.query('DELETE FROM products WHERE id NOT IN (?)', [pIds]);
+      }
+    } else if (products && products.length === 0) {
+      await connection.query('DELETE FROM products');
     }
 
     if (rms && rms.length > 0) {
