@@ -849,20 +849,23 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
     const [wpl, setWpl] = useState(b?.wpl || "");
     const [remarks, setRemarks] = useState(b?.remarks || "");
     const [isEditingRemarks, setIsEditingRemarks] = useState(false);
-    const [printNoPrices, setPrintNoPrices] = useState(false);
-    
     const handlePrintNoPrices = () => {
-        setPrintNoPrices(true);
+        // Direct DOM manipulation bypasses any React rendering delays
+        document.body.classList.add('hide-prices-for-print-now');
         setTimeout(() => {
             window.print();
-        }, 400); // 400ms ensures DOM is fully updated before print dialog
+        }, 100); 
     };
 
     useEffect(() => {
-        // Reset the state only after the print dialog is closed
-        const handleAfterPrint = () => setPrintNoPrices(false);
-        window.addEventListener("afterprint", handleAfterPrint);
-        return () => window.removeEventListener("afterprint", handleAfterPrint);
+        const cleanup = () => document.body.classList.remove('hide-prices-for-print-now');
+        window.addEventListener("afterprint", cleanup);
+        window.addEventListener("focus", cleanup); // Fallback for Safari/Mac
+        return () => {
+            window.removeEventListener("afterprint", cleanup);
+            window.removeEventListener("focus", cleanup);
+            cleanup();
+        };
     }, []);
 
     const [rows, setRows] = useState(() =>
@@ -995,7 +998,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
             </div>
 
             {/* Invoice Card */}
-            <div className={`print-main ${printNoPrices ? "hide-prices-print" : ""}`} style={{
+            <div className="print-main" style={{
                 background: "white", padding: 40, fontFamily: "'Inter',sans-serif",
                 color: "#111827", boxShadow: "0 4px 20px rgba(0,0,0,.05)",
                 position: "relative", overflow: "hidden",
@@ -2029,7 +2032,7 @@ export default function App() {
         .print-empty-row { display: none; }
 
         @media print {
-            .hide-prices-print .price-col { display: none !important; }
+            body.hide-prices-for-print-now .price-col { display: none !important; }
             .print-view-wrapper { position: static !important; overflow: visible !important; }
             @page { margin: 12mm 15mm; size: A4; }
             html, body { 
