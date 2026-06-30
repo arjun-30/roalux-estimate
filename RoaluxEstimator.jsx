@@ -855,9 +855,15 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
         setPrintNoPrices(true);
         setTimeout(() => {
             window.print();
-            setPrintNoPrices(false);
-        }, 100);
+        }, 400); // 400ms ensures DOM is fully updated before print dialog
     };
+
+    useEffect(() => {
+        // Reset the state only after the print dialog is closed
+        const handleAfterPrint = () => setPrintNoPrices(false);
+        window.addEventListener("afterprint", handleAfterPrint);
+        return () => window.removeEventListener("afterprint", handleAfterPrint);
+    }, []);
 
     const [rows, setRows] = useState(() =>
         (b?.formula || []).map(r => ({ _id: uid(), rmId: r.rmId, qty: String(r.qty) }))
