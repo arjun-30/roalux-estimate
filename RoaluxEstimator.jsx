@@ -1605,9 +1605,44 @@ export default function App() {
         return () => window.removeEventListener("online", handleOnline);
     }, [token, showToast]);
 
+    // Auto-sync Polling
+    useEffect(() => {
+        if (!loaded || !token) return;
+        const fetchUpdates = async () => {
+            if (!navigator.onLine || localStorage.getItem("roalux_sync_pending") === "true") return;
+            // Pause polling if user made a local change in the last 5 seconds to prevent overwriting local edits
+            if (window.lastLocalActivity && (Date.now() - window.lastLocalActivity < 5000)) return;
+            
+            try {
+                const res = await fetch("/api/data", { headers: { "Authorization": `Bearer ${token}` } });
+                if (res.status === 401) {
+                    setToken(null);
+                    localStorage.removeItem("roalux_token");
+                    return;
+                }
+                const data = await res.json();
+                if (!data.error && localStorage.getItem("roalux_sync_pending") !== "true") {
+                    window.isPollingUpdate = true;
+                    setSuppliers(data.suppliers || []);
+                    setRms(data.rms || []);
+                    setProducts(data.products || []);
+                    setActivity(data.activity || []);
+                    setTimeout(() => { window.isPollingUpdate = false; }, 200);
+                }
+            } catch (err) {
+                console.error("Polling error", err);
+            }
+        };
+
+        const interval = setInterval(fetchUpdates, 15000); // 15 seconds
+        return () => clearInterval(interval);
+    }, [loaded, token]);
+
     // Sync to DB when state changes
     useEffect(() => {
         if (!loaded || !token) return;
+        if (window.isPollingUpdate) return;
+        window.lastLocalActivity = Date.now();
         const timer = setTimeout(() => {
             const payload = { products, rms, activity };
             const existingCacheStr = localStorage.getItem("roalux_offline_data") || "{}";
