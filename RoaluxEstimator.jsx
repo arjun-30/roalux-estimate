@@ -849,24 +849,15 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
     const [wpl, setWpl] = useState(b?.wpl || "");
     const [remarks, setRemarks] = useState(b?.remarks || "");
     const [isEditingRemarks, setIsEditingRemarks] = useState(false);
-    const handlePrintNoPrices = () => {
-        // Direct DOM manipulation bypasses any React rendering delays
-        document.body.classList.add('hide-prices-for-print-now');
-        setTimeout(() => {
-            window.print();
-        }, 100); 
+    const handlePrintInvoice = () => {
+        document.body.classList.remove('hide-prices-for-print-now');
+        setTimeout(() => window.print(), 300);
     };
 
-    useEffect(() => {
-        const cleanup = () => document.body.classList.remove('hide-prices-for-print-now');
-        window.addEventListener("afterprint", cleanup);
-        window.addEventListener("focus", cleanup); // Fallback for Safari/Mac
-        return () => {
-            window.removeEventListener("afterprint", cleanup);
-            window.removeEventListener("focus", cleanup);
-            cleanup();
-        };
-    }, []);
+    const handlePrintNoPrices = () => {
+        document.body.classList.add('hide-prices-for-print-now');
+        setTimeout(() => window.print(), 300); 
+    };
 
     const [rows, setRows] = useState(() =>
         (b?.formula || []).map(r => ({ _id: uid(), rmId: r.rmId, qty: String(r.qty) }))
@@ -953,7 +944,7 @@ function BatchDetail({ state, pid, bid, onBack, onSave, showToast }) {
                     <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{b.bid}</span>
                 </div>
                 <div className="no-print" style={{ display: "flex", gap: 12 }}>
-                    <button className="btn btn-ghost" onClick={() => window.print()} style={{ display: "flex", alignItems: "center", background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#4B5563", fontSize: 13, padding: "8px 16px", borderRadius: 8, boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+                    <button className="btn btn-ghost" onClick={handlePrintInvoice} style={{ display: "flex", alignItems: "center", background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#4B5563", fontSize: 13, padding: "8px 16px", borderRadius: 8, boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
                             <polyline points="6 9 6 2 18 2 18 9"></polyline>
                             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
